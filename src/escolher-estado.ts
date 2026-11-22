@@ -9,6 +9,24 @@ import type { Estado, TocadasRecentes, TocandoAgora } from './tipos.js'
  * Use paraMusica(faixa) para converter a faixa do Spotify.
  */
 export function escolherEstado(atual: TocandoAgora | null, recentes: TocadasRecentes | null): Estado {
-  // TODO(Eduardo): implementar a regra acima (≈10 linhas)
-  throw new Error('escolherEstado ainda não implementada')
+  if (atual?.item?.type === 'track' && atual.is_playing) {
+    return {
+      tipo: 'tocando',
+      musica: paraMusica(atual.item)
+    }
+  }
+
+  const ultima = recentes?.items?.[0]
+
+  if (ultima) {
+    return {
+      tipo: 'ultima',
+      musica: paraMusica(ultima.track),
+      tocadaEm: new Date(ultima.played_at)
+    }
+  }
+
+  return {
+    tipo: 'vazio'
+  }
 }

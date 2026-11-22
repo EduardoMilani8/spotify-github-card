@@ -2,7 +2,7 @@
 
 An animated vinyl card for your GitHub profile that shows what you're playing on Spotify right now, or the last track you played.
 
-<img src="https://spotify-github-card.vercel.app/api/now-playing?mock=tocando" width="440" alt="Card preview">
+<img src="https://spotify-github-card.vercel.app/api/now-playing?mock=playing" width="440" alt="Card preview">
 
 ## Setup
 
@@ -53,6 +53,7 @@ Done. Clicking the card opens the track on Spotify.
 ## Tips
 
 - **Size:** change `width` in the `<img>` tag.
-- **Preview without Spotify:** `/api/now-playing?mock=tocando`, `ultima`, `vazio` or `longo`.
-- **Card says "Nada tocando por aqui"?** Your env vars are missing or wrong. Check them in Vercel, then **Redeploy**.
+- **Language:** English by default. Add `?lang=pt` to the image URL for Portuguese.
+- **Preview without Spotify:** `/api/now-playing?mock=playing`, `last`, `empty` or `long`.
+- **Card says "Nothing playing right now"?** Your env vars are missing or wrong. Check them in Vercel, then **Redeploy**.
 - **Tests:** `npm test`

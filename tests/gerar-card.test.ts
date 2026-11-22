@@ -78,7 +78,8 @@ describe('formato inesperado do Spotify', () => {
   })
   it('gerarCard ainda devolve um SVG', async () => {
     const { deps } = criarDeps({ atual: () => json(200, quebrada) })
-    expect(await gerarCard(deps)).toContain('Nada tocando por aqui')
+    expect(await gerarCard(deps)).toContain('Nothing playing right now')
+    expect(await gerarCard(deps, 'pt')).toContain('Nada tocando por aqui')
   })
 })
 

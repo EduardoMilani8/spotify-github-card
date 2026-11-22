@@ -1,4 +1,5 @@
 import { ajustarTexto, escaparXml, tempoDecorrido, type AjusteTexto } from './texto.js'
+import { TEXTOS, type Idioma } from './idioma.js'
 import type { Estado } from './tipos.js'
 
 const FUNDO = '#0e4429'
@@ -57,19 +58,20 @@ function equalizador(): string {
   return `<g class="eq" transform="translate(${X_TEXTO} 108)">${quadrados.join('')}</g>`
 }
 
-export function renderizarCard(estado: Estado, capa: string | null, agora: Date): string {
+export function renderizarCard(estado: Estado, capa: string | null, agora: Date, idioma: Idioma = 'en'): string {
+  const t = TEXTOS[idioma]
   const tocando = estado.tipo === 'tocando'
-  const titulo = estado.tipo === 'vazio' ? 'Nada tocando por aqui' : estado.musica.nome
+  const titulo = estado.tipo === 'vazio' ? t.vazio : estado.musica.nome
   const subtitulo = estado.tipo === 'vazio' ? '' : `${estado.musica.artistas} · ${estado.musica.album}`
-  const selo = estado.tipo === 'tocando' ? 'TOCANDO AGORA' : estado.tipo === 'ultima' ? 'ÚLTIMA OUVIDA' : ''
+  const selo = estado.tipo === 'tocando' ? t.seloTocando : estado.tipo === 'ultima' ? t.seloUltima : ''
   const rodape =
     estado.tipo === 'ultima' && estado.tocadaEm
-      ? `${tempoDecorrido(estado.tocadaEm, agora)} no Spotify`
-      : 'no Spotify'
+      ? `${tempoDecorrido(estado.tocadaEm, agora, idioma)} ${t.noSpotify}`
+      : t.noSpotify
   const rotulo =
     estado.tipo === 'vazio'
-      ? 'Nada tocando no Spotify'
-      : `${selo === 'TOCANDO AGORA' ? 'Tocando agora' : 'Última ouvida'}: ${estado.musica.nome} — ${estado.musica.artistas}`
+      ? t.rotuloVazio
+      : `${tocando ? t.rotuloTocando : t.rotuloUltima}: ${estado.musica.nome} — ${estado.musica.artistas}`
 
   const linhaTitulo = linha('titulo', titulo, ajustarTexto(titulo, LARGURA_TEXTO, 20, 16), 72,
     `fill="#ffffff" font-weight="500" font-family="${FONTE}"`)

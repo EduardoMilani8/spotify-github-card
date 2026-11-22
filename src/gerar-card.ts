@@ -8,6 +8,7 @@ import {
   obterAccessToken,
   type FetchFn,
 } from './spotify.js'
+import type { Idioma } from './idioma.js'
 import type { Estado } from './tipos.js'
 
 export interface Dependencias {
@@ -56,15 +57,15 @@ export async function obterEstado(deps: Dependencias): Promise<Estado> {
   }
 }
 
-export async function gerarCard(deps: Dependencias): Promise<string> {
+export async function gerarCard(deps: Dependencias, idioma: Idioma = 'en'): Promise<string> {
   const estado = await obterEstado(deps)
   try {
     const capaUrl = estado.tipo === 'vazio' ? null : estado.musica.capaUrl
     const capa = capaUrl ? await baixarCapaBase64(capaUrl, deps.fetchFn) : null
-    return renderizarCard(estado, capa, deps.agora())
+    return renderizarCard(estado, capa, deps.agora(), idioma)
   } catch (erro) {
     deps.log('Falha ao montar o card', erro)
-    return renderizarCard({ tipo: 'vazio' }, null, deps.agora())
+    return renderizarCard({ tipo: 'vazio' }, null, deps.agora(), idioma)
   }
 }
 

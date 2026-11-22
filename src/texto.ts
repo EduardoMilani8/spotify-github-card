@@ -1,3 +1,5 @@
+import { TEXTOS, type Idioma } from './idioma.js'
+
 const ESCAPES: Record<string, string> = {
   '&': '&amp;',
   '<': '&lt;',
@@ -42,12 +44,12 @@ export function ajustarTexto(
   return { fontSize: fontMin, rolagem: Math.ceil(larguraEstimada(texto, fontMin) - larguraMax) }
 }
 
-export function tempoDecorrido(desde: Date, agora: Date): string {
+export function tempoDecorrido(desde: Date, agora: Date, idioma: Idioma = 'en'): string {
+  const t = TEXTOS[idioma]
   const minutos = Math.floor((agora.getTime() - desde.getTime()) / 60_000)
-  if (minutos < 1) return 'agora há pouco'
-  if (minutos < 60) return `há ${minutos} min`
+  if (minutos < 1) return t.agoraHaPouco
+  if (minutos < 60) return t.minutos(minutos)
   const horas = Math.floor(minutos / 60)
-  if (horas < 24) return `há ${horas} h`
-  const dias = Math.floor(horas / 24)
-  return dias === 1 ? 'há 1 dia' : `há ${dias} dias`
+  if (horas < 24) return t.horas(horas)
+  return t.dias(Math.floor(horas / 24))
 }

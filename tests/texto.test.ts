@@ -49,12 +49,23 @@ describe('tempoDecorrido', () => {
   const agora = new Date('2026-11-22T12:00:00Z')
   const antes = (ms: number) => new Date(agora.getTime() - ms)
   const MIN = 60_000
-  it('menos de 1 minuto', () => expect(tempoDecorrido(antes(30_000), agora)).toBe('agora há pouco'))
-  it('minutos', () => expect(tempoDecorrido(antes(12 * MIN), agora)).toBe('há 12 min'))
-  it('horas', () => expect(tempoDecorrido(antes(3 * 60 * MIN), agora)).toBe('há 3 h'))
-  it('um dia', () => expect(tempoDecorrido(antes(25 * 60 * MIN), agora)).toBe('há 1 dia'))
-  it('vários dias', () => expect(tempoDecorrido(antes(5 * 24 * 60 * MIN), agora)).toBe('há 5 dias'))
+  it('menos de 1 minuto', () => expect(tempoDecorrido(antes(30_000), agora, 'pt')).toBe('agora há pouco'))
+  it('minutos', () => expect(tempoDecorrido(antes(12 * MIN), agora, 'pt')).toBe('há 12 min'))
+  it('horas', () => expect(tempoDecorrido(antes(3 * 60 * MIN), agora, 'pt')).toBe('há 3 h'))
+  it('um dia', () => expect(tempoDecorrido(antes(25 * 60 * MIN), agora, 'pt')).toBe('há 1 dia'))
+  it('vários dias', () => expect(tempoDecorrido(antes(5 * 24 * 60 * MIN), agora, 'pt')).toBe('há 5 dias'))
   it('data no futuro (relógio adiantado) vira "agora há pouco"', () => {
-    expect(tempoDecorrido(new Date(agora.getTime() + 5 * MIN), agora)).toBe('agora há pouco')
+    expect(tempoDecorrido(new Date(agora.getTime() + 5 * MIN), agora, 'pt')).toBe('agora há pouco')
   })
+})
+
+describe('tempoDecorrido em inglês (padrão)', () => {
+  const agora = new Date('2026-11-22T12:00:00Z')
+  const antes = (ms: number) => new Date(agora.getTime() - ms)
+  const MIN = 60_000
+  it('menos de 1 minuto', () => expect(tempoDecorrido(antes(30_000), agora)).toBe('just now'))
+  it('minutos', () => expect(tempoDecorrido(antes(12 * MIN), agora)).toBe('12 min ago'))
+  it('horas', () => expect(tempoDecorrido(antes(3 * 60 * MIN), agora)).toBe('3 h ago'))
+  it('um dia', () => expect(tempoDecorrido(antes(25 * 60 * MIN), agora)).toBe('1 day ago'))
+  it('vários dias', () => expect(tempoDecorrido(antes(5 * 24 * 60 * MIN), agora)).toBe('5 days ago'))
 })

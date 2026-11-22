@@ -22,11 +22,11 @@ describe('renderizarCard', () => {
     ['ultima', ultima],
     ['vazio', vazio],
   ])('gera XML válido no estado %s', (_, estado) => {
-    expect(XMLValidator.validate(renderizarCard(estado, CAPA, agora))).toBe(true)
+    expect(XMLValidator.validate(renderizarCard(estado, CAPA, agora, 'pt'))).toBe(true)
   })
 
   it('tocando: classe de animação, selo e braço sobre o disco', () => {
-    const svg = renderizarCard(tocando, CAPA, agora)
+    const svg = renderizarCard(tocando, CAPA, agora, 'pt')
     expect(svg).toContain('class="tocando"')
     expect(svg).toContain('TOCANDO AGORA')
     expect(svg).not.toContain('rotate(-38 156 20)')
@@ -35,7 +35,7 @@ describe('renderizarCard', () => {
   })
 
   it('ultima: braço afastado, selo e tempo decorrido', () => {
-    const svg = renderizarCard(ultima, CAPA, agora)
+    const svg = renderizarCard(ultima, CAPA, agora, 'pt')
     expect(svg).toContain('class="ultima"')
     expect(svg).toContain('ÚLTIMA OUVIDA')
     expect(svg).toContain('rotate(-38 156 20)')
@@ -43,14 +43,14 @@ describe('renderizarCard', () => {
   })
 
   it('ultima sem horário conhecido: selo de última e rodapé sem tempo', () => {
-    const svg = renderizarCard({ tipo: 'ultima', musica: musica(), tocadaEm: null }, CAPA, agora)
+    const svg = renderizarCard({ tipo: 'ultima', musica: musica(), tocadaEm: null }, CAPA, agora, 'pt')
     expect(svg).toContain('ÚLTIMA OUVIDA')
     expect(svg).toContain('>no Spotify<')
     expect(XMLValidator.validate(svg)).toBe(true)
   })
 
   it('vazio: mensagem, sem selo e sem capa', () => {
-    const svg = renderizarCard(vazio, CAPA, agora)
+    const svg = renderizarCard(vazio, CAPA, agora, 'pt')
     expect(svg).toContain('Nada tocando por aqui')
     expect(svg).not.toContain('TOCANDO AGORA')
     expect(svg).not.toContain('ÚLTIMA OUVIDA')
@@ -58,21 +58,21 @@ describe('renderizarCard', () => {
   })
 
   it('com capa usa <image> recortada; sem capa usa selo verde', () => {
-    expect(renderizarCard(tocando, CAPA, agora)).toContain(`href="${CAPA}"`)
-    const semCapa = renderizarCard(tocando, null, agora)
+    expect(renderizarCard(tocando, CAPA, agora, 'pt')).toContain(`href="${CAPA}"`)
+    const semCapa = renderizarCard(tocando, null, agora, 'pt')
     expect(semCapa).not.toContain('<image')
     expect(semCapa).toContain('r="25" fill="#39d353"')
   })
 
   it('escapa caracteres especiais e continua XML válido', () => {
-    const svg = renderizarCard({ tipo: 'tocando', musica: musica('Rock & Roll <3') }, CAPA, agora)
+    const svg = renderizarCard({ tipo: 'tocando', musica: musica('Rock & Roll <3') }, CAPA, agora, 'pt')
     expect(svg).toContain('Rock &amp; Roll &lt;3')
     expect(XMLValidator.validate(svg)).toBe(true)
   })
 
   it('nome longo: rolagem com keyframes e texto completo presente', () => {
     const longo = 'Um nome de música absurdamente longo (feat. Outro Artista) - Remastered'
-    const svg = renderizarCard({ tipo: 'tocando', musica: musica(longo) }, CAPA, agora)
+    const svg = renderizarCard({ tipo: 'tocando', musica: musica(longo) }, CAPA, agora, 'pt')
     expect(svg).toContain('@keyframes rolar-titulo')
     expect(svg).toContain('clip-path="url(#recorte-titulo)"')
     expect(svg).toContain(longo)
@@ -80,6 +80,25 @@ describe('renderizarCard', () => {
   })
 
   it('nome curto: sem rolagem', () => {
-    expect(renderizarCard(tocando, CAPA, agora)).not.toContain('@keyframes rolar-titulo')
+    expect(renderizarCard(tocando, CAPA, agora, 'pt')).not.toContain('@keyframes rolar-titulo')
+  })
+
+  describe('em inglês (padrão)', () => {
+    it('tocando', () => {
+      const svg = renderizarCard(tocando, CAPA, agora)
+      expect(svg).toContain('NOW PLAYING')
+      expect(svg).toContain('>on Spotify<')
+      expect(svg).toContain('aria-label="Now playing: Validation')
+    })
+    it('ultima', () => {
+      const svg = renderizarCard(ultima, CAPA, agora)
+      expect(svg).toContain('LAST PLAYED')
+      expect(svg).toContain('5 min ago on Spotify')
+    })
+    it('vazio', () => {
+      const svg = renderizarCard(vazio, CAPA, agora)
+      expect(svg).toContain('Nothing playing right now')
+      expect(XMLValidator.validate(svg)).toBe(true)
+    })
   })
 })

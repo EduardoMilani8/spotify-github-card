@@ -2,14 +2,26 @@ import type { Estado, Musica } from './tipos.js'
 
 const base: Musica = {
   nome: 'Validation',
-  artistas: 'Artista',
+  artistas: 'Artist',
   album: 'Validation (Deluxe)',
   capaUrl: null,
   url: 'https://open.spotify.com/',
 }
 
+/** Nomes aceitos em ?mock= (inglês) e os nomes antigos em português, mantidos por compatibilidade. */
+const ALIASES: Record<string, 'tocando' | 'ultima' | 'vazio' | 'longo'> = {
+  playing: 'tocando',
+  last: 'ultima',
+  empty: 'vazio',
+  long: 'longo',
+  tocando: 'tocando',
+  ultima: 'ultima',
+  vazio: 'vazio',
+  longo: 'longo',
+}
+
 export function estadoMock(nome: string, agora: Date): Estado | null {
-  switch (nome) {
+  switch (ALIASES[nome]) {
     case 'tocando':
       return { tipo: 'tocando', musica: base }
     case 'ultima':
@@ -21,8 +33,8 @@ export function estadoMock(nome: string, agora: Date): Estado | null {
         tipo: 'tocando',
         musica: {
           ...base,
-          nome: 'Um nome de música absurdamente longo (feat. Outro Artista) - Remastered Deluxe Version',
-          artistas: 'Artista Um, Artista Dois, Artista Três, Artista Quatro',
+          nome: 'A Ridiculously Long Song Title (feat. Another Artist) - Remastered Deluxe Version',
+          artistas: 'Artist One, Artist Two, Artist Three, Artist Four',
         },
       }
     default:

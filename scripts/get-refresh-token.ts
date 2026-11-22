@@ -22,21 +22,12 @@ urlLogin.search = new URLSearchParams({
   state,
 }).toString()
 
-const servidor = createServer(async (req, res) => {
-  const url = new URL(req.url ?? '/', REDIRECT_URI)
-  if (url.pathname !== '/callback') {
-    res.writeHead(404).end()
-    return
-  }
-  if (url.searchParams.get('state') !== state) {
-    res.writeHead(400).end('state inválido')
-    return
-  }
-  const code = url.searchParams.get('code')
-  if (!code) {
-    res.writeHead(400).end(`Autorização negada: ${url.searchParams.get('error')}`)
-    return
-  }
+function encerrar(codigoSaida: number) {
+  process.exitCode = codigoSaida
+  servidor.close()
+}
+
+async function trocarCodigo(code: string): Promise<string> {
   const resposta = await fetch('https://accounts.spotify.com/api/token', {
     method: 'POST',
     headers: {
@@ -44,18 +35,52 @@ const servidor = createServer(async (req, res) => {
       'Content-Type': 'application/x-www-form-urlencoded',
     },
     body: new URLSearchParams({ grant_type: 'authorization_code', code, redirect_uri: REDIRECT_URI }),
+    signal: AbortSignal.timeout(10_000),
   })
-  const dados = (await resposta.json()) as { refresh_token?: string }
-  if (!resposta.ok || !dados.refresh_token) {
-    res.writeHead(500).end('Falha ao trocar o código. Veja o terminal.')
-    console.error(dados)
-    process.exitCode = 1
-  } else {
-    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' }).end('Pronto! Pode fechar esta aba.')
-    console.log(`\nSPOTIFY_REFRESH_TOKEN=${dados.refresh_token}\n`)
-    console.log('Copie a linha acima para o .env e para as Environment Variables da Vercel.')
+  const texto = await resposta.text()
+  let dados: { refresh_token?: string; error?: string; error_description?: string } = {}
+  try {
+    dados = JSON.parse(texto)
+  } catch {
+    throw new Error(`Resposta inesperada do Spotify (HTTP ${resposta.status})`)
   }
-  servidor.close()
+  if (!resposta.ok || !dados.refresh_token) {
+    throw new Error(`Spotify recusou o código (HTTP ${resposta.status}): ${dados.error_description ?? dados.error ?? 'sem detalhes'}`)
+  }
+  return dados.refresh_token
+}
+
+const servidor = createServer(async (req, res) => {
+  const url = new URL(req.url ?? '/', REDIRECT_URI)
+  if (url.pathname !== '/callback') {
+    res.writeHead(404).end()
+    return
+  }
+  // Requisição com state errado não é a nossa: ignora e continua esperando.
+  if (url.searchParams.get('state') !== state) {
+    res.writeHead(400).end('state inválido')
+    return
+  }
+  const code = url.searchParams.get('code')
+  if (!code) {
+    const motivo = url.searchParams.get('error') ?? 'desconhecido'
+    res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' }).end(`Autorização negada: ${motivo}`)
+    console.error(`Autorização negada no Spotify (${motivo}). Rode "npm run token" de novo.`)
+    encerrar(1)
+    return
+  }
+  try {
+    const refreshToken = await trocarCodigo(code)
+    res.writeHead(200, { 'Content-Type': 'text/plain; charset=utf-8' }).end('Pronto! Pode fechar esta aba.')
+    console.log(`\nSPOTIFY_REFRESH_TOKEN=${refreshToken}\n`)
+    console.log('Copie a linha acima para o .env e para as Environment Variables da Vercel.')
+    encerrar(0)
+  } catch (erro) {
+    const mensagem = erro instanceof Error ? erro.message : String(erro)
+    res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' }).end('Falha ao trocar o código. Veja o terminal.')
+    console.error(`${mensagem}\nRode "npm run token" de novo.`)
+    encerrar(1)
+  }
 })
 
 servidor.listen(PORTA, '127.0.0.1', () => {

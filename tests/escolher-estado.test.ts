@@ -52,6 +52,19 @@ describe('escolherEstado', () => {
   it('nada tocando e histórico indisponível (null) → vazio', () => {
     expect(escolherEstado(null, null)).toEqual({ tipo: 'vazio' })
   })
+  it('pausada e histórico indisponível → a própria faixa pausada, sem horário', () => {
+    expect(escolherEstado(tocando('Pausada', false), null)).toEqual({
+      tipo: 'ultima',
+      musica: expect.objectContaining({ nome: 'Pausada' }),
+      tocadaEm: null,
+    })
+  })
+  it('pausada e histórico vazio → a própria faixa pausada', () => {
+    expect(escolherEstado(tocando('Pausada', false), { items: [] })).toMatchObject({
+      tipo: 'ultima',
+      musica: { nome: 'Pausada' },
+    })
+  })
   it('tocando mesmo com histórico indisponível → tocando', () => {
     expect(escolherEstado(tocando('Atual'), null)).toMatchObject({ tipo: 'tocando' })
   })

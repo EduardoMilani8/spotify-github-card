@@ -63,7 +63,9 @@ export function renderizarCard(estado: Estado, capa: string | null, agora: Date)
   const subtitulo = estado.tipo === 'vazio' ? '' : `${estado.musica.artistas} · ${estado.musica.album}`
   const selo = estado.tipo === 'tocando' ? 'TOCANDO AGORA' : estado.tipo === 'ultima' ? 'ÚLTIMA OUVIDA' : ''
   const rodape =
-    estado.tipo === 'ultima' ? `${tempoDecorrido(estado.tocadaEm, agora)} no Spotify` : 'no Spotify'
+    estado.tipo === 'ultima' && estado.tocadaEm
+      ? `${tempoDecorrido(estado.tocadaEm, agora)} no Spotify`
+      : 'no Spotify'
   const rotulo =
     estado.tipo === 'vazio'
       ? 'Nada tocando no Spotify'

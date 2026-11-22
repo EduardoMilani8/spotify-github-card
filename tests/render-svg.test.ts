@@ -42,6 +42,13 @@ describe('renderizarCard', () => {
     expect(svg).toContain('há 5 min no Spotify')
   })
 
+  it('ultima sem horário conhecido: selo de última e rodapé sem tempo', () => {
+    const svg = renderizarCard({ tipo: 'ultima', musica: musica(), tocadaEm: null }, CAPA, agora)
+    expect(svg).toContain('ÚLTIMA OUVIDA')
+    expect(svg).toContain('>no Spotify<')
+    expect(XMLValidator.validate(svg)).toBe(true)
+  })
+
   it('vazio: mensagem, sem selo e sem capa', () => {
     const svg = renderizarCard(vazio, CAPA, agora)
     expect(svg).toContain('Nada tocando por aqui')

@@ -5,6 +5,9 @@ describe('escaparXml', () => {
   it('escapa os cinco caracteres especiais do XML', () => {
     expect(escaparXml(`Rock & Roll <3 "a" 'b' >`)).toBe('Rock &amp; Roll &lt;3 &quot;a&quot; &apos;b&apos; &gt;')
   })
+  it('remove caracteres de controle proibidos no XML', () => {
+    expect(escaparXml('a\u0000b\u0008c\u001Fd\te')).toBe('abcd\te')
+  })
   it('não altera texto comum', () => {
     expect(escaparXml('Validation')).toBe('Validation')
   })

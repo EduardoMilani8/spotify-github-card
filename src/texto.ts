@@ -6,8 +6,10 @@ const ESCAPES: Record<string, string> = {
   "'": '&apos;',
 }
 
+const PROIBIDOS_XML = /[\u0000-\u0008\u000B\u000C\u000E-\u001F\uFFFE\uFFFF]|[\uD800-\uDBFF](?![\uDC00-\uDFFF])|(?<![\uD800-\uDBFF])[\uDC00-\uDFFF]/g
+
 export function escaparXml(texto: string): string {
-  return texto.replace(/[&<>"']/g, (c) => ESCAPES[c])
+  return texto.replace(PROIBIDOS_XML, '').replace(/[&<>"']/g, (c) => ESCAPES[c])
 }
 
 const FATOR_COMUM = 0.56

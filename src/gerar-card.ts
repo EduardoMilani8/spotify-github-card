@@ -48,14 +48,24 @@ export async function obterEstado(deps: Dependencias): Promise<Estado> {
       return null
     }),
   ])
-  return escolherEstado(atual, recentes)
+  try {
+    return escolherEstado(atual, recentes)
+  } catch (erro) {
+    deps.log('Resposta do Spotify em formato inesperado', erro)
+    return { tipo: 'vazio' }
+  }
 }
 
 export async function gerarCard(deps: Dependencias): Promise<string> {
   const estado = await obterEstado(deps)
-  const capaUrl = estado.tipo === 'vazio' ? null : estado.musica.capaUrl
-  const capa = capaUrl ? await baixarCapaBase64(capaUrl, deps.fetchFn) : null
-  return renderizarCard(estado, capa, deps.agora())
+  try {
+    const capaUrl = estado.tipo === 'vazio' ? null : estado.musica.capaUrl
+    const capa = capaUrl ? await baixarCapaBase64(capaUrl, deps.fetchFn) : null
+    return renderizarCard(estado, capa, deps.agora())
+  } catch (erro) {
+    deps.log('Falha ao montar o card', erro)
+    return renderizarCard({ tipo: 'vazio' }, null, deps.agora())
+  }
 }
 
 export function urlDestino(estado: Estado): string {

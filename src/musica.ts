@@ -15,6 +15,6 @@ export function paraMusica(faixa: SpotifyFaixa): Musica {
     artistas: faixa.artists.map((a) => a.name).join(', '),
     album: faixa.album.name,
     capaUrl: escolherImagemCapa(faixa.album.images),
-    url: faixa.external_urls.spotify,
+    url: faixa.external_urls?.spotify ?? 'https://open.spotify.com/',
   }
 }

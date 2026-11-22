@@ -36,4 +36,8 @@ describe('paraMusica', () => {
       url: 'https://open.spotify.com/track/1',
     })
   })
+  it('arquivo local (sem external_urls.spotify) aponta para a página inicial do Spotify', () => {
+    const local = { ...faixa, album: { name: 'x', images: [] }, external_urls: {} } as SpotifyFaixa
+    expect(paraMusica(local).url).toBe('https://open.spotify.com/')
+  })
 })

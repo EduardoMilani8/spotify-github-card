@@ -4,7 +4,7 @@ export interface SpotifyFaixa {
   name: string
   artists: { name: string }[]
   album: { name: string; images: SpotifyImagem[] }
-  external_urls: { spotify: string }
+  external_urls: { spotify?: string }
 }
 export interface SpotifyEpisodio { type: 'episode'; name: string }
 export interface TocandoAgora {

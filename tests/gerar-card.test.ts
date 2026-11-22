@@ -69,6 +69,19 @@ describe('obterEstado', () => {
   })
 })
 
+describe('formato inesperado do Spotify', () => {
+  const quebrada = { is_playing: true, currently_playing_type: 'track', item: { type: 'track', name: 'Sem artistas' } }
+  it('obterEstado devolve vazio e loga', async () => {
+    const { deps, log } = criarDeps({ atual: () => json(200, quebrada) })
+    expect(await obterEstado(deps)).toEqual({ tipo: 'vazio' })
+    expect(log).toHaveBeenCalled()
+  })
+  it('gerarCard ainda devolve um SVG', async () => {
+    const { deps } = criarDeps({ atual: () => json(200, quebrada) })
+    expect(await gerarCard(deps)).toContain('Nada tocando por aqui')
+  })
+})
+
 describe('gerarCard', () => {
   it('embute a capa baixada', async () => {
     const { deps } = criarDeps({ atual: () => json(200, { is_playing: true, currently_playing_type: 'track', item: faixa('Atual') }) })

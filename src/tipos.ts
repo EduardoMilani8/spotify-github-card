@@ -16,5 +16,6 @@ export interface TocadasRecentes { items: { track: SpotifyFaixa; played_at: stri
 export interface Musica { nome: string; artistas: string; album: string; capaUrl: string | null; url: string }
 export type Estado =
   | { tipo: 'tocando'; musica: Musica }
+  | { tipo: 'pausada'; musica: Musica }
   | { tipo: 'ultima'; musica: Musica; tocadaEm: Date | null }
   | { tipo: 'vazio' }

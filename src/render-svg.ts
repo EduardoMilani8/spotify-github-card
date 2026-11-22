@@ -63,7 +63,7 @@ export function renderizarCard(estado: Estado, capa: string | null, agora: Date,
   const tocando = estado.tipo === 'tocando'
   const titulo = estado.tipo === 'vazio' ? t.vazio : estado.musica.nome
   const subtitulo = estado.tipo === 'vazio' ? '' : `${estado.musica.artistas} · ${estado.musica.album}`
-  const selo = estado.tipo === 'tocando' ? t.seloTocando : estado.tipo === 'ultima' ? t.seloUltima : ''
+  const selo = { tocando: t.seloTocando, pausada: t.seloPausada, ultima: t.seloUltima, vazio: '' }[estado.tipo]
   const rodape =
     estado.tipo === 'ultima' && estado.tocadaEm
       ? `${tempoDecorrido(estado.tocadaEm, agora, idioma)} ${t.noSpotify}`
@@ -71,7 +71,7 @@ export function renderizarCard(estado: Estado, capa: string | null, agora: Date,
   const rotulo =
     estado.tipo === 'vazio'
       ? t.rotuloVazio
-      : `${tocando ? t.rotuloTocando : t.rotuloUltima}: ${estado.musica.nome} — ${estado.musica.artistas}`
+      : `${{ tocando: t.rotuloTocando, pausada: t.rotuloPausada, ultima: t.rotuloUltima }[estado.tipo]}: ${estado.musica.nome} — ${estado.musica.artistas}`
 
   const linhaTitulo = linha('titulo', titulo, ajustarTexto(titulo, LARGURA_TEXTO, 20, 16), 72,
     `fill="#ffffff" font-weight="500" font-family="${FONTE}"`)

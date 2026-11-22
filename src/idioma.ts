@@ -3,6 +3,8 @@ export type Idioma = 'en' | 'pt'
 export interface Textos {
   seloTocando: string
   seloUltima: string
+  seloPausada: string
+  rotuloPausada: string
   vazio: string
   noSpotify: string
   rotuloTocando: string
@@ -18,6 +20,8 @@ export const TEXTOS: Record<Idioma, Textos> = {
   en: {
     seloTocando: 'NOW PLAYING',
     seloUltima: 'LAST PLAYED',
+    seloPausada: 'PAUSED',
+    rotuloPausada: 'Paused',
     vazio: 'Nothing playing right now',
     noSpotify: 'on Spotify',
     rotuloTocando: 'Now playing',
@@ -31,6 +35,8 @@ export const TEXTOS: Record<Idioma, Textos> = {
   pt: {
     seloTocando: 'TOCANDO AGORA',
     seloUltima: 'ÚLTIMA OUVIDA',
+    seloPausada: 'PAUSADA',
+    rotuloPausada: 'Pausada',
     vazio: 'Nada tocando por aqui',
     noSpotify: 'no Spotify',
     rotuloTocando: 'Tocando agora',

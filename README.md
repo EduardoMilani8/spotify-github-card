@@ -54,7 +54,7 @@ Done. Clicking the card opens the track on Spotify.
 
 - **Size:** change `width` in the `<img>` tag.
 - **Language:** English by default. Add `?lang=pt` to the image URL for Portuguese.
-- **Preview without Spotify:** `/api/now-playing?mock=playing`, `last`, `empty` or `long`.
+- **Preview without Spotify:** `/api/now-playing?mock=playing`, `paused`, `last`, `empty` or `long`.
 - **Card says "Nothing playing right now"?** Your env vars are missing or wrong. Check them in Vercel, then **Redeploy**.
 - **Tests:** `npm test`
 

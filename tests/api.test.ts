@@ -4,7 +4,7 @@ import { GET as nowPlaying } from '../api/now-playing.js'
 const chamar = (query: string) => nowPlaying(new Request(`https://x.vercel.app/api/now-playing?${query}`))
 
 describe('GET /api/now-playing?mock=', () => {
-  it.each(['playing', 'last', 'empty', 'long', 'tocando', 'ultima', 'vazio', 'longo'])(
+  it.each(['playing', 'last', 'paused', 'empty', 'long', 'tocando', 'ultima', 'pausada', 'vazio', 'longo'])(
     'mock %s responde SVG 200 sem cache',
     async (mock) => {
       const resposta = await chamar(`mock=${mock}`)

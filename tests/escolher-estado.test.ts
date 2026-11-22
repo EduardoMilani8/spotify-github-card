@@ -23,13 +23,9 @@ describe('escolherEstado', () => {
     const e = escolherEstado(tocando('Atual'), recentes('Anterior'))
     expect(e).toMatchObject({ tipo: 'tocando', musica: { nome: 'Atual' } })
   })
-  it('música pausada → última do histórico', () => {
+  it('música pausada → a própria faixa pausada, mesmo com outra no histórico', () => {
     const e = escolherEstado(tocando('Pausada', false), recentes('Anterior'))
-    expect(e).toEqual({
-      tipo: 'ultima',
-      musica: expect.objectContaining({ nome: 'Anterior' }),
-      tocadaEm: new Date('2026-11-22T11:48:00Z'),
-    })
+    expect(e).toEqual({ tipo: 'pausada', musica: expect.objectContaining({ nome: 'Pausada' }) })
   })
   it('nada tocando (204 → null) → última do histórico', () => {
     expect(escolherEstado(null, recentes('Anterior'))).toMatchObject({ tipo: 'ultima' })
@@ -52,18 +48,12 @@ describe('escolherEstado', () => {
   it('nada tocando e histórico indisponível (null) → vazio', () => {
     expect(escolherEstado(null, null)).toEqual({ tipo: 'vazio' })
   })
-  it('pausada e histórico indisponível → a própria faixa pausada, sem horário', () => {
-    expect(escolherEstado(tocando('Pausada', false), null)).toEqual({
-      tipo: 'ultima',
-      musica: expect.objectContaining({ nome: 'Pausada' }),
-      tocadaEm: null,
-    })
+  it('pausada e histórico indisponível → pausada', () => {
+    expect(escolherEstado(tocando('Pausada', false), null)).toMatchObject({ tipo: 'pausada', musica: { nome: 'Pausada' } })
   })
-  it('pausada e histórico vazio → a própria faixa pausada', () => {
-    expect(escolherEstado(tocando('Pausada', false), { items: [] })).toMatchObject({
-      tipo: 'ultima',
-      musica: { nome: 'Pausada' },
-    })
+  it('podcast pausado → última música do histórico', () => {
+    const podcast: TocandoAgora = { is_playing: false, currently_playing_type: 'episode', item: { type: 'episode', name: 'Ep. 1' } }
+    expect(escolherEstado(podcast, recentes('Anterior'))).toMatchObject({ tipo: 'ultima', musica: { nome: 'Anterior' } })
   })
   it('tocando mesmo com histórico indisponível → tocando', () => {
     expect(escolherEstado(tocando('Atual'), null)).toMatchObject({ tipo: 'tocando' })

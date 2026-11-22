@@ -15,12 +15,14 @@ const CAPA = 'data:image/jpeg;base64,AAAA'
 const tocando: Estado = { tipo: 'tocando', musica: musica() }
 const ultima: Estado = { tipo: 'ultima', musica: musica(), tocadaEm: new Date('2026-11-22T11:55:00Z') }
 const vazio: Estado = { tipo: 'vazio' }
+const pausada: Estado = { tipo: 'pausada', musica: musica() }
 
 describe('renderizarCard', () => {
   it.each([
     ['tocando', tocando],
     ['ultima', ultima],
     ['vazio', vazio],
+    ['pausada', pausada],
   ])('gera XML válido no estado %s', (_, estado) => {
     expect(XMLValidator.validate(renderizarCard(estado, CAPA, agora, 'pt'))).toBe(true)
   })
@@ -47,6 +49,16 @@ describe('renderizarCard', () => {
     expect(svg).toContain('ÚLTIMA OUVIDA')
     expect(svg).toContain('>no Spotify<')
     expect(XMLValidator.validate(svg)).toBe(true)
+  })
+
+  it('pausada: selo de pausada, braço afastado, disco parado, capa visível', () => {
+    const svg = renderizarCard(pausada, CAPA, agora, 'pt')
+    expect(svg).toContain('class="pausada"')
+    expect(svg).toContain('PAUSADA')
+    expect(svg).toContain('rotate(-38 156 20)')
+    expect(svg).toContain('<image')
+    expect(svg).toContain('>no Spotify<')
+    expect(svg).toContain('aria-label="Pausada: Validation')
   })
 
   it('vazio: mensagem, sem selo e sem capa', () => {
@@ -94,6 +106,11 @@ describe('renderizarCard', () => {
       const svg = renderizarCard(ultima, CAPA, agora)
       expect(svg).toContain('LAST PLAYED')
       expect(svg).toContain('5 min ago on Spotify')
+    })
+    it('pausada', () => {
+      const svg = renderizarCard(pausada, CAPA, agora)
+      expect(svg).toContain('>PAUSED<')
+      expect(svg).toContain('aria-label="Paused: Validation')
     })
     it('vazio', () => {
       const svg = renderizarCard(vazio, CAPA, agora)

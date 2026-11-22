@@ -57,3 +57,7 @@ Done. Clicking the card opens the track on Spotify.
 - **Preview without Spotify:** `/api/now-playing?mock=playing`, `last`, `empty` or `long`.
 - **Card says "Nothing playing right now"?** Your env vars are missing or wrong. Check them in Vercel, then **Redeploy**.
 - **Tests:** `npm test`
+
+## License
+
+[MIT](LICENSE)

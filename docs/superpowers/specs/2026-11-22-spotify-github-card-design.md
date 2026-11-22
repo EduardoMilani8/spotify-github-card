@@ -63,17 +63,21 @@ o tamanho pode ser ajustado só no README, sem novo deploy.
 |---|---|---|---|---|---|
 | `tocando` | gira (4s/volta) | sobre o disco | animado | TOCANDO AGORA | no Spotify |
 | `ultima` | parado | afastado (rotate −38°) | apagado (opacidade 0.2) | ÚLTIMA OUVIDA | há X min no Spotify |
-| `vazio` | parado, selo verde liso no lugar da capa | afastado | apagado | — | Nada tocando por aqui |
+| `vazio` | parado, selo verde liso no lugar da capa | afastado | apagado | (sem selo) | no Spotify |
+
+No estado `vazio`, a linha do nome mostra `Nada tocando por aqui` e a linha de artista fica vazia.
 
 O servidor gera o SVG já no estado correto. Não há JavaScript no SVG.
 
 ### Nomes longos (nunca cortar o texto)
 
-Aplicado ao nome da música e à linha `Artista · Álbum`, cada um com sua largura
-disponível (~270 unidades do viewBox, de x=178 até a margem direita).
+Aplicado ao nome da música e à linha `Artista · Álbum` (vários artistas são
+separados por vírgula).
 
-1. Estimar a largura do texto: `caracteres × fontSize × 0.56` (fator médio para
-   fonte sans-serif, com margem de segurança).
+1. Estimar a largura do texto: soma, por caractere, de `fontSize × 0.56`
+   (fator médio para fonte sans-serif) ou `fontSize × 1.0` para caracteres largos
+   (CJK, emoji: code point ≥ U+2E80).
+   A largura disponível é 266 (de x=178 até x=444).
 2. Se couber no tamanho padrão → usa o tamanho padrão.
 3. Senão, reduzir a fonte até o mínimo (música: 20 → 16px; artista: 13 → 11px).
 4. Se ainda não couber no mínimo → **rolagem (marquee)**: o texto fica dentro de
@@ -87,8 +91,9 @@ disponível (~270 unidades do viewBox, de x=178 até a margem direita).
 GitHub (Camo) ──► Vercel GET /api/now-playing
                     1. refresh token → access token
                     2. GET /v1/me/player/currently-playing
-                    3. se não estiver tocando → GET /v1/me/player/recently-played?limit=1
-                    4. baixa a capa (menor imagem ≥ 64px) → base64
+                    3. em paralelo: GET /v1/me/player/recently-played?limit=1 (falha de uma das
+                       duas chamadas não derruba a outra)
+                    4. baixa a capa (menor imagem com largura ≥ 100px, na prática a de 300px; nítida em telas retina) → base64
                     5. monta o SVG
                     └─► 200 image/svg+xml, Cache-Control: no-cache, no-store, max-age=0
 ```
@@ -122,7 +127,7 @@ Stack: TypeScript, Vercel Functions (sem framework), Vitest.
 | `src/texto.ts` | `escaparXml`, estimativa de largura, ajuste de fonte/marquee, formatação de "há X min/h/dias". | — |
 | `src/render-svg.ts` | Recebe o estado + capa base64 e devolve a string SVG. Não sabe nada de Spotify. | `texto.ts` |
 | `api/now-playing.ts` | Liga as peças, define cabeçalhos, trata erros. Aceita `?mock=tocando\|ultima\|vazio\|longo` para prévia sem Spotify. | todos acima |
-| `api/open.ts` | Redireciona (302) para a URL da música atual/última no Spotify; sem música → perfil do usuário no Spotify. | `spotify.ts`, `escolher-estado.ts` |
+| `api/open.ts` | Redireciona (302) para a URL da música atual/última no Spotify; sem música → `https://open.spotify.com/`. | `spotify.ts`, `escolher-estado.ts` |
 | `scripts/get-refresh-token.ts` | Fluxo de autorização local, executado uma vez. | — |
 
 ## 6. Erros e casos especiais

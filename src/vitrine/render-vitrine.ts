@@ -27,7 +27,10 @@ const ACELERA = 'animation-timing-function:cubic-bezier(.55,0,1,.6)'
 const FREIA = 'animation-timing-function:cubic-bezier(0,.4,.35,1.08)'
 
 const CSS_CARROSSEL =
-  '.alb{animation:orbita 12s infinite;animation-delay:var(--d)}' +
+  // A rota de trás cruza as da frente durante as transições, e o SVG não tem z-index:
+  // o disco some enquanto passa por trás e reaparece do outro lado.
+  '.alb{animation:orbita 12s infinite,atras 12s linear infinite;animation-delay:var(--d)}' +
+  '@keyframes atras{0%,58.3%{opacity:1}59.5%,65.5%{opacity:0}66.6%,100%{opacity:1}}' +
   '@keyframes orbita{' +
   '0%{transform:translate(200px,68px) scale(1,1) skewY(0deg)}' +
   `25%{transform:translate(200px,68px) scale(1,1) skewY(0deg);${ACELERA}}` +

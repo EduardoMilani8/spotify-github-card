@@ -1,5 +1,5 @@
 import { describe, expect, it, vi } from 'vitest'
-import { CABECALHOS_VITRINE, gerarVitrine } from '../../src/vitrine/gerar-vitrine.js'
+import { CABECALHOS_VITRINE, CABECALHOS_VITRINE_DEGRADADA, gerarVitrine } from '../../src/vitrine/gerar-vitrine.js'
 
 const ID = '37i9dQZF1DXcBWIGoYBM5M'
 const json = (status: number, corpo: unknown) =>
@@ -40,7 +40,8 @@ function criarDeps(rotas: Rotas = {}, env: Record<string, string | undefined> = 
 describe('gerarVitrine', () => {
   it('caminho feliz: carrossel com 3 capas embutidas', async () => {
     const { deps, log } = criarDeps()
-    const svg = await gerarVitrine(deps)
+    const { svg, degradada } = await gerarVitrine(deps)
+    expect(degradada).toBe(false)
     expect(svg).toContain('class="carrossel"')
     expect(svg).toContain('Album a')
     expect(svg.split('data:image/jpeg;base64,').length - 1).toBe(3)
@@ -49,20 +50,20 @@ describe('gerarVitrine', () => {
 
   it('sem SPOTIFY_SHOWCASE_PLAYLIST: vazio, log, nenhuma chamada', async () => {
     const { deps, log, fetchFn } = criarDeps({}, { ...ENV, SPOTIFY_SHOWCASE_PLAYLIST: undefined })
-    expect(await gerarVitrine(deps)).toContain('class="vazio"')
+    expect(await gerarVitrine(deps)).toMatchObject({ degradada: true, svg: expect.stringContaining('class="vazio"') })
     expect(log).toHaveBeenCalled()
     expect(fetchFn).not.toHaveBeenCalled()
   })
 
   it('token recusado: vazio e log', async () => {
     const { deps, log } = criarDeps({ token: () => json(400, { error: 'invalid_grant' }) })
-    expect(await gerarVitrine(deps)).toContain('class="vazio"')
+    expect(await gerarVitrine(deps)).toMatchObject({ degradada: true, svg: expect.stringContaining('class="vazio"') })
     expect(log).toHaveBeenCalled()
   })
 
   it('playlist com 403: vazio e log', async () => {
     const { deps, log } = criarDeps({ playlist: () => json(403, { error: { status: 403 } }) })
-    expect(await gerarVitrine(deps)).toContain('class="vazio"')
+    expect(await gerarVitrine(deps)).toMatchObject({ degradada: true, svg: expect.stringContaining('class="vazio"') })
     expect(log).toHaveBeenCalled()
   })
 
@@ -72,14 +73,31 @@ describe('gerarVitrine', () => {
     ['entradas malformadas', { items: [{ item: { type: 'track', album: 'x' } }, {}] }],
   ])('formato inesperado (%s): vazio, sem erro', async (_, corpo) => {
     const { deps } = criarDeps({ playlist: () => json(200, corpo) })
-    expect(await gerarVitrine(deps)).toContain('class="vazio"')
+    expect((await gerarVitrine(deps)).svg).toContain('class="vazio"')
   })
 
   it('capa que falha: carrossel continua, com fallback', async () => {
     const { deps } = criarDeps({ capa: () => new Response(null, { status: 500 }) })
-    const svg = await gerarVitrine(deps)
+    const { svg, degradada } = await gerarVitrine(deps)
+    expect(degradada).toBe(true)
     expect(svg).toContain('class="carrossel"')
     expect(svg).not.toContain('<image')
+  })
+})
+
+describe('vitrine legitimamente vazia', () => {
+  it('playlist sem álbuns não é degradada (cache normal)', async () => {
+    const { deps } = criarDeps({ playlist: () => json(200, { items: [] }) })
+    expect(await gerarVitrine(deps)).toMatchObject({ degradada: false, svg: expect.stringContaining('class="vazio"') })
+  })
+})
+
+describe('CABECALHOS_VITRINE_DEGRADADA', () => {
+  it('erro fica só 60s na CDN', () => {
+    expect(CABECALHOS_VITRINE_DEGRADADA).toEqual({
+      'Cache-Control': 'no-cache, no-store, max-age=0',
+      'CDN-Cache-Control': 'max-age=60',
+    })
   })
 })
 

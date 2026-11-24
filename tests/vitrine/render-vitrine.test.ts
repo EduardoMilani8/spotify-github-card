@@ -23,6 +23,12 @@ describe('renderizarVitrine', () => {
     expect(contar(svg, 'class="pt"')).toBe(3)
   })
 
+  it('o disco que passa por trás some antes de cruzar os da frente', () => {
+    const svg = renderizarVitrine(lista(3), capas(3), agora)
+    expect(svg).toContain('animation:orbita 12s infinite,atras 12s linear infinite')
+    expect(svg).toContain('@keyframes atras{0%,58.3%{opacity:1}59.5%,65.5%{opacity:0}66.6%,100%{opacity:1}}')
+  })
+
   it('cada capa é embutida uma única vez e reaproveitada com <use>', () => {
     const svg = renderizarVitrine(lista(3), capas(3), agora)
     expect(contar(svg, CAPA)).toBe(3)

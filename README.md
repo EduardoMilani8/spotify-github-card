@@ -50,11 +50,26 @@ Create a public repo named exactly like your username (e.g. `octocat/octocat`) a
 
 Done. Clicking the card opens the track on Spotify.
 
+### Optional: album showcase
+
+A second card that shows 3 albums you pick, in an animated carousel.
+
+1. Create a Spotify playlist and add one song from each album (order = showcase order).
+2. Add `SPOTIFY_SHOWCASE_PLAYLIST` (the playlist link) to `.env` and to Vercel, then **Redeploy**.
+3. Put both cards side by side in your profile README:
+
+```html
+<a href="https://<your-app>.vercel.app/api/open"><img src="https://<your-app>.vercel.app/api/now-playing" width="440" alt="What I'm listening to on Spotify"></a>
+<a href="https://open.spotify.com/playlist/<id>"><img src="https://<your-app>.vercel.app/api/showcase" width="383" alt="Albums on display this month"></a>
+```
+
+Changes to the playlist show up within an hour. Tokens created before this feature need `npm run token` again (it now asks for `playlist-read-private`).
+
 ## Tips
 
 - **Size:** change `width` in the `<img>` tag.
 - **Language:** English by default. Add `?lang=pt` to the image URL for Portuguese.
-- **Preview without Spotify:** `/api/now-playing?mock=playing`, `paused`, `last`, `empty` or `long`.
+- **Preview without Spotify:** `/api/now-playing?mock=playing`, `paused`, `last`, `empty` or `long`; `/api/showcase?mock=showcase` or `empty`.
 - **Card says "Nothing playing right now"?** Your env vars are missing or wrong. Check them in Vercel, then **Redeploy**.
 - **Tests:** `npm test`
 

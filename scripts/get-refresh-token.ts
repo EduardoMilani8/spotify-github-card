@@ -3,7 +3,7 @@ import { createServer } from 'node:http'
 
 const PORTA = 8888
 const REDIRECT_URI = `http://127.0.0.1:${PORTA}/callback`
-const ESCOPOS = 'user-read-currently-playing user-read-recently-played'
+const ESCOPOS = 'user-read-currently-playing user-read-recently-played playlist-read-private'
 
 const clientId = process.env.SPOTIFY_CLIENT_ID
 const clientSecret = process.env.SPOTIFY_CLIENT_SECRET

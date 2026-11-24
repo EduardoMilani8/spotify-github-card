@@ -9,7 +9,7 @@ export interface Credenciais {
 }
 
 const TIMEOUT_MS = 2500
-const API = 'https://api.spotify.com/v1/me/player'
+const API = 'https://api.spotify.com/v1'
 const CONTENT_TYPE_IMAGEM = /^image\/[a-z0-9.+-]+$/
 
 export function lerCredenciais(env: Record<string, string | undefined>): Credenciais {
@@ -40,7 +40,7 @@ export async function obterAccessToken(cred: Credenciais, fetchFn: FetchFn = fet
   return dados.access_token
 }
 
-async function getApi(caminho: string, token: string, fetchFn: FetchFn): Promise<Response> {
+export async function getApi(caminho: string, token: string, fetchFn: FetchFn): Promise<Response> {
   const resposta = await fetchFn(`${API}${caminho}`, {
     headers: { Authorization: `Bearer ${token}` },
     signal: AbortSignal.timeout(TIMEOUT_MS),
@@ -50,13 +50,13 @@ async function getApi(caminho: string, token: string, fetchFn: FetchFn): Promise
 }
 
 export async function buscarTocandoAgora(token: string, fetchFn: FetchFn = fetch): Promise<TocandoAgora | null> {
-  const resposta = await getApi('/currently-playing', token, fetchFn)
+  const resposta = await getApi('/me/player/currently-playing', token, fetchFn)
   if (resposta.status === 204) return null
   return (await resposta.json()) as TocandoAgora
 }
 
 export async function buscarRecentes(token: string, fetchFn: FetchFn = fetch): Promise<TocadasRecentes> {
-  const resposta = await getApi('/recently-played?limit=1', token, fetchFn)
+  const resposta = await getApi('/me/player/recently-played?limit=1', token, fetchFn)
   return (await resposta.json()) as TocadasRecentes
 }
 

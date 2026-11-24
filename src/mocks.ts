@@ -1,4 +1,5 @@
 import type { Estado, Musica } from './tipos.js'
+import type { Album } from './vitrine/tipos.js'
 
 const base: Musica = {
   nome: 'Validation',
@@ -44,4 +45,17 @@ export function estadoMock(nome: string, agora: Date): Estado | null {
     default:
       return null
   }
+}
+
+const ALBUNS_MOCK: Album[] = [
+  { id: 'mock1', nome: 'Album One', artistas: 'Artist', capaUrl: null },
+  { id: 'mock2', nome: 'Album Two', artistas: 'Artist', capaUrl: null },
+  { id: 'mock3', nome: 'Album Three', artistas: 'Artist', capaUrl: null },
+]
+
+/** Álbuns de exemplo para /api/showcase?mock=showcase|empty. */
+export function albunsMock(nome: string): Album[] | null {
+  if (nome === 'showcase') return ALBUNS_MOCK
+  if (nome === 'empty') return []
+  return null
 }

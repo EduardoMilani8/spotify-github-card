@@ -14,6 +14,10 @@ export interface Textos {
   minutos: (n: number) => string
   horas: (n: number) => string
   dias: (n: number) => string
+  vitrineTitulo: string
+  meses: string[]
+  vitrineVazia: string
+  rotuloVitrine: (lista: string) => string
 }
 
 export const TEXTOS: Record<Idioma, Textos> = {
@@ -31,6 +35,10 @@ export const TEXTOS: Record<Idioma, Textos> = {
     minutos: (n) => `${n} min ago`,
     horas: (n) => `${n} h ago`,
     dias: (n) => (n === 1 ? '1 day ago' : `${n} days ago`),
+    vitrineTitulo: 'ON DISPLAY',
+    meses: ['JANUARY', 'FEBRUARY', 'MARCH', 'APRIL', 'MAY', 'JUNE', 'JULY', 'AUGUST', 'SEPTEMBER', 'OCTOBER', 'NOVEMBER', 'DECEMBER'],
+    vitrineVazia: 'Showcase coming soon',
+    rotuloVitrine: (lista) => `On display: ${lista}`,
   },
   pt: {
     seloTocando: 'TOCANDO AGORA',
@@ -46,6 +54,10 @@ export const TEXTOS: Record<Idioma, Textos> = {
     minutos: (n) => `há ${n} min`,
     horas: (n) => `há ${n} h`,
     dias: (n) => (n === 1 ? 'há 1 dia' : `há ${n} dias`),
+    vitrineTitulo: 'EM EXPOSIÇÃO',
+    meses: ['JANEIRO', 'FEVEREIRO', 'MARÇO', 'ABRIL', 'MAIO', 'JUNHO', 'JULHO', 'AGOSTO', 'SETEMBRO', 'OUTUBRO', 'NOVEMBRO', 'DEZEMBRO'],
+    vitrineVazia: 'Vitrine em breve',
+    rotuloVitrine: (lista) => `Em exposição: ${lista}`,
   },
 }
 

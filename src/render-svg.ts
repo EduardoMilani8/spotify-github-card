@@ -58,6 +58,29 @@ function equalizador(): string {
   return `<g class="eq" transform="translate(${X_TEXTO} 108)">${quadrados.join('')}</g>`
 }
 
+/** Disco de vinil centrado em (78, 75), r 60: sulcos, reflexo, centro (capa ou selo) e aro verde. */
+export function discoElementos(centro: string): string {
+  return (
+    '<circle cx="78" cy="75" r="60" fill="#010409"/>' +
+    '<circle cx="78" cy="75" r="54" fill="none" stroke="#21262d"/>' +
+    '<circle cx="78" cy="75" r="46" fill="none" stroke="#161b22"/>' +
+    '<circle cx="78" cy="75" r="38" fill="none" stroke="#21262d"/>' +
+    '<path d="M 38 40 A 54 54 0 0 1 70 22" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="3"/>' +
+    centro +
+    '<circle cx="78" cy="75" r="25" fill="none" stroke="#39d353" stroke-width="1.5"/>' +
+    '<circle cx="78" cy="75" r="2.5" fill="#010409"/>'
+  )
+}
+
+/** Braço do toca-discos com pivô em (156, 20); a agulha pousa no disco sem rotação. */
+export function bracoElementos(): string {
+  return (
+    '<circle cx="156" cy="20" r="7" fill="#d0d7de"/>' +
+    '<path d="M 156 20 L 146 46 L 126 62" fill="none" stroke="#d0d7de" stroke-width="3" stroke-linecap="round"/>' +
+    '<rect x="119" y="58" width="11" height="7" rx="1.5" fill="#ffffff" transform="rotate(-38 124 61)"/>'
+  )
+}
+
 export function renderizarCard(estado: Estado, capa: string | null, agora: Date, idioma: Idioma = 'en'): string {
   const t = TEXTOS[idioma]
   const tocando = estado.tipo === 'tocando'
@@ -92,11 +115,7 @@ export function renderizarCard(estado: Estado, capa: string | null, agora: Date,
     linhaTitulo.css +
     linhaSub.css
 
-  const braco = `<g${tocando ? '' : ' transform="rotate(-38 156 20)"'}>` +
-    '<circle cx="156" cy="20" r="7" fill="#d0d7de"/>' +
-    '<path d="M 156 20 L 146 46 L 126 62" fill="none" stroke="#d0d7de" stroke-width="3" stroke-linecap="round"/>' +
-    '<rect x="119" y="58" width="11" height="7" rx="1.5" fill="#ffffff" transform="rotate(-38 124 61)"/>' +
-    '</g>'
+  const braco = `<g${tocando ? '' : ' transform="rotate(-38 156 20)"'}>${bracoElementos()}</g>`
 
   const logoSpotify =
     '<g transform="translate(240 122)"><circle cx="7" cy="7" r="7" fill="#ffffff"/>' +
@@ -108,16 +127,7 @@ export function renderizarCard(estado: Estado, capa: string | null, agora: Date,
     `<style>${css}</style>`,
     `<defs><clipPath id="recorte-capa"><circle cx="78" cy="75" r="25"/></clipPath>${linhaTitulo.defs}${linhaSub.defs}</defs>`,
     `<rect width="460" height="150" rx="10" fill="${FUNDO}"/>`,
-    '<g class="disco">',
-    '<circle cx="78" cy="75" r="60" fill="#010409"/>',
-    '<circle cx="78" cy="75" r="54" fill="none" stroke="#21262d"/>',
-    '<circle cx="78" cy="75" r="46" fill="none" stroke="#161b22"/>',
-    '<circle cx="78" cy="75" r="38" fill="none" stroke="#21262d"/>',
-    '<path d="M 38 40 A 54 54 0 0 1 70 22" fill="none" stroke="#ffffff" stroke-opacity=".12" stroke-width="3"/>',
-    centro,
-    '<circle cx="78" cy="75" r="25" fill="none" stroke="#39d353" stroke-width="1.5"/>',
-    '<circle cx="78" cy="75" r="2.5" fill="#010409"/>',
-    '</g>',
+    `<g class="disco">${discoElementos(centro)}</g>`,
     braco,
     selo
       ? `<text x="${X_TEXTO}" y="44" font-size="11" letter-spacing="1.5" fill="#9be9a8" font-family="${FONTE}">${selo}</text>`

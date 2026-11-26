@@ -1,6 +1,6 @@
 import { XMLValidator } from 'fast-xml-parser'
 import { describe, expect, it } from 'vitest'
-import { renderizarVitrine } from '../../src/vitrine/render-vitrine.js'
+import { corpoVitrine, renderizarVitrine } from '../../src/vitrine/render-vitrine.js'
 import type { Album } from '../../src/vitrine/tipos.js'
 
 const agora = new Date('2026-11-24T12:00:00Z')
@@ -86,5 +86,26 @@ describe('renderizarVitrine', () => {
     const svg = renderizarVitrine(lista(3), [null, null, null], agora)
     expect(svg).not.toContain('<image')
     expect(svg).toContain('fill="#006d32"')
+  })
+})
+
+describe('corpoVitrine com prefixo', () => {
+  const albuns = [1, 2, 3].map((n) => ({ id: `a${n}`, nome: `Um Álbum Com Nome Bem Comprido Número ${n}`, artistas: 'Artista Um, Artista Dois, Artista Três', capaUrl: null }))
+  const op = { prefixo: 'a-', fundo: '#0d1117', fonteTitulo: [15, 12] as [number, number], indicador: false, mensagemVazia: 'vazio' }
+
+  it('todo id e toda referência levam o prefixo', () => {
+    for (const lista of [albuns, albuns.slice(0, 2), albuns.slice(0, 1), []]) {
+      const c = corpoVitrine(lista, [], op)
+      const svg = c.defs + c.elementos
+      for (const [, id] of svg.matchAll(/ id="([^"]+)"/g)) expect(id.startsWith('a-')).toBe(true)
+      for (const [, ref] of svg.matchAll(/(?:url\(#|href="#)([^)"]+)/g)) expect(ref.startsWith('a-')).toBe(true)
+    }
+  })
+
+  it('sem indicador e com a cor de fundo pedida', () => {
+    const c = corpoVitrine(albuns, [], op)
+    expect(c.tipo).toBe('carrossel')
+    expect(c.elementos).not.toContain('class="pt"')
+    expect(c.elementos).toContain('fill="#0d1117"')
   })
 })

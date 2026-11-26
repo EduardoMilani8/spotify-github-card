@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8"?>
+<rss version="2.0" xmlns:letterboxd="https://letterboxd.com" xmlns:tmdb="https://themoviedb.org" xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <channel>
+    <title>Letterboxd - exemplo</title>
+    <link>https://letterboxd.com/exemplo/</link>
+    <description>Letterboxd - exemplo</description>
+    <item>
+      <title>Filmes favoritos</title>
+      <link>https://letterboxd.com/exemplo/list/filmes-favoritos/</link>
+      <guid isPermaLink="false">letterboxd-list-1</guid>
+      <description><![CDATA[<p>Uma lista qualquer.</p>]]></description>
+    </item>
+    <item>
+      <title>Só Registrado, 2024 - ★★★</title>
+      <link>https://letterboxd.com/exemplo/film/so-registrado/</link>
+      <guid isPermaLink="false">letterboxd-watch-2</guid>
+      <letterboxd:watchedDate>2026-11-20</letterboxd:watchedDate>
+      <letterboxd:rewatch>No</letterboxd:rewatch>
+      <letterboxd:filmTitle>Só Registrado</letterboxd:filmTitle>
+      <letterboxd:filmYear>2024</letterboxd:filmYear>
+      <letterboxd:memberRating>3.0</letterboxd:memberRating>
+      <description><![CDATA[ <p><img src="https://a.ltrbxd.com/resized/film-poster/1/1/11-so-registrado-0-600-0-900-crop.jpg?v=aa"/></p> <p>Watched on Thursday November 20, 2026.</p> ]]></description>
+    </item>
+    <item>
+      <title>Aftersun, 2022 - ★★★★½ (contains spoilers)</title>
+      <link>https://letterboxd.com/exemplo/film/aftersun/</link>
+      <guid isPermaLink="false">letterboxd-review-3</guid>
+      <letterboxd:watchedDate>2026-11-09</letterboxd:watchedDate>
+      <letterboxd:rewatch>No</letterboxd:rewatch>
+      <letterboxd:filmTitle>Aftersun</letterboxd:filmTitle>
+      <letterboxd:filmYear>2022</letterboxd:filmYear>
+      <letterboxd:memberRating>4.5</letterboxd:memberRating>
+      <description><![CDATA[ <p><img src="https://a.ltrbxd.com/resized/film-poster/2/2/22-aftersun-0-600-0-900-crop.jpg?v=bb"/></p> <p><em>This review may contain spoilers.</em></p> <p>Sobre lembrar alguém &amp; perceber   que você nunca conheceu essa pessoa.</p><p>Chorei no &quot;Under Pressure&quot;.<br/>De novo &#x1F622;</p> ]]></description>
+    </item>
+    <item>
+      <title>Antigo, 2001 - ★★</title>
+      <link>https://letterboxd.com/exemplo/film/antigo/</link>
+      <guid isPermaLink="false">letterboxd-review-4</guid>
+      <letterboxd:watchedDate>2026-10-01</letterboxd:watchedDate>
+      <letterboxd:filmTitle>Antigo</letterboxd:filmTitle>
+      <letterboxd:filmYear>2001</letterboxd:filmYear>
+      <letterboxd:memberRating>2.0</letterboxd:memberRating>
+      <description><![CDATA[ <p><img src="https://a.ltrbxd.com/resized/film-poster/3/3/33-antigo-0-600-0-900-crop.jpg?v=cc"/></p> <p>Review antiga.</p> ]]></description>
+    </item>
+  </channel>
+</rss>

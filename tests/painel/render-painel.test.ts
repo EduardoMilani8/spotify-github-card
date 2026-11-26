@@ -105,4 +105,37 @@ describe('renderizarPainel', () => {
     expect(XMLValidator.validate(svg)).toBe(true)
     expect(svg).toContain('Tom &amp; Jerry &lt;3')
   })
+
+  it('sem borda em volta do painel (só o fundo)', () => {
+    expect(render()).not.toContain('stroke="#30363d"/><path d="M22 18')
+    expect(render()).toMatch(/<rect x="0" y="0" width="840" height="356" rx="6" fill="#0d1117"\/>/)
+  })
+})
+
+describe('renderizarPainel por parte', () => {
+  const parte = (p: 'musica' | 'filmes') => renderizarPainel(base, AGORA, p)
+
+  it('musica: cabeçalho e linha de cima, recortada', () => {
+    const svg = parte('musica')
+    expect(XMLValidator.validate(svg)).toBe(true)
+    expect(svg).toMatch(/^<svg[^>]*width="840" height="194" viewBox="0 0 840 194"/)
+    for (const t of ['gostos', 'tocando-agora', 'albuns-do-mes']) expect(svg).toContain(t)
+    for (const t of ['Aftersun', 'top-4-filmes', 'Letterboxd']) expect(svg).not.toContain(t)
+  })
+
+  it('filmes: só a linha de baixo, sem imagens da música', () => {
+    const svg = parte('filmes')
+    expect(XMLValidator.validate(svg)).toBe(true)
+    expect(svg).toMatch(/^<svg[^>]*width="840" height="150" viewBox="0 194 840 150"/)
+    for (const t of ['>Aftersun<', 'top-4-filmes', 'favoritos no Letterboxd']) expect(svg).toContain(t)
+    for (const t of ['gostos', 'tocando-agora', 'albuns-do-mes', 'a-img-0']) expect(svg).not.toContain(t)
+  })
+
+  it('ids únicos e referências válidas nas duas partes', () => {
+    for (const svg of [parte('musica'), parte('filmes')]) {
+      const lista = ids(svg)
+      expect(new Set(lista).size).toBe(lista.length)
+      for (const [, ref] of svg.matchAll(/(?:url\(#|href="#)([^)"]+)/g)) expect(lista).toContain(ref)
+    }
+  })
 })

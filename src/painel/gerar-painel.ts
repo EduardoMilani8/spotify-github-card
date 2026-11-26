@@ -4,7 +4,7 @@ import type { Estado } from '../tipos.js'
 import { obterAlbuns } from '../vitrine/gerar-vitrine.js'
 import type { Album } from '../vitrine/tipos.js'
 import { buscarRss, escolherReview } from './letterboxd.js'
-import { renderizarPainel } from './render-painel.js'
+import { renderizarPainel, type PartePainel } from './render-painel.js'
 import type { Review } from './tipos.js'
 import { TOP4 } from './top4.js'
 
@@ -106,12 +106,14 @@ async function musicaComCapa(deps: Dependencias): Promise<{ estado: Estado; capa
   return { estado, capa: estado.tipo === 'vazio' ? null : await baixar(estado.musica.capaUrl, deps) }
 }
 
-export async function gerarPainel(deps: Dependencias, memo: Memo = MEMO_DA_INSTANCIA): Promise<string> {
-  const [{ estado, capa }, lentos] = await Promise.all([musicaComCapa(deps), dadosLentos(deps, memo)])
+export async function gerarPainel(deps: Dependencias, memo: Memo = MEMO_DA_INSTANCIA, parte: PartePainel = 'completo'): Promise<string> {
+  // A metade dos filmes não mostra a música: não precisa consultar o Spotify do "tocando agora".
+  const musica = parte === 'filmes' ? Promise.resolve({ estado: { tipo: 'vazio' } as Estado, capa: null }) : musicaComCapa(deps)
+  const [{ estado, capa }, lentos] = await Promise.all([musica, dadosLentos(deps, memo)])
   try {
-    return renderizarPainel({ estado, capa, ...lentos, top4: TOP4 }, deps.agora())
+    return renderizarPainel({ estado, capa, ...lentos, top4: TOP4 }, deps.agora(), parte)
   } catch (erro) {
     deps.log('Falha ao montar o painel', erro)
-    return renderizarPainel({ estado: { tipo: 'vazio' }, capa: null, ...VAZIOS, top4: TOP4 }, deps.agora())
+    return renderizarPainel({ estado: { tipo: 'vazio' }, capa: null, ...VAZIOS, top4: TOP4 }, deps.agora(), parte)
   }
 }

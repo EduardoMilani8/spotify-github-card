@@ -28,4 +28,10 @@ describe('GET /api/painel', () => {
     expect(svg).toContain('vitrine em breve')
     expect(svg).toContain('nenhuma review por aqui ainda')
   })
+
+  it('?parte=musica e ?parte=filmes devolvem cada metade', async () => {
+    expect(await (await pedir('?mock=playing&parte=musica')).text()).toContain('viewBox="0 0 840 194"')
+    expect(await (await pedir('?mock=playing&parte=filmes')).text()).toContain('viewBox="0 194 840 150"')
+    expect(await (await pedir('?mock=playing&parte=xyz')).text()).toContain('viewBox="0 0 840 356"')
+  })
 })

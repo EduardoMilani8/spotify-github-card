@@ -233,29 +233,46 @@ const CABECALHO =
 const CSS_SEM_MOVIMENTO =
   '@media (prefers-reduced-motion: reduce){*{animation-play-state:paused!important}.primeiro{opacity:1!important;transform:none!important}}'
 
-function rotulo(d: DadosPainel): string {
-  const musica = d.estado.tipo === 'vazio' ? 'nada tocando no Spotify' : `${d.estado.musica.nome} — ${d.estado.musica.artistas}`
-  const review = d.review ? `; última review: ${d.review.filme}` : ''
-  return `Música e filmes do Eduardo: ${musica}${review}`
+/** Qual pedaço do painel desenhar: tudo, só a linha de cima (música) ou só a de baixo (filmes). */
+export type PartePainel = 'completo' | 'musica' | 'filmes'
+
+/** Recorte de cada parte (y inicial e altura). O GitHub só aceita um link por imagem, então o painel pode ser dividido em duas. */
+const RECORTES: Record<PartePainel, { y: number; altura: number }> = {
+  completo: { y: 0, altura: 356 },
+  musica: { y: 0, altura: 194 },
+  filmes: { y: 194, altura: 150 },
 }
 
-export function renderizarPainel(d: DadosPainel, agora: Date): string {
+export function lerParte(valor: string | null | undefined): PartePainel {
+  return valor === 'musica' || valor === 'filmes' ? valor : 'completo'
+}
+
+function rotulo(d: DadosPainel, parte: PartePainel): string {
+  const musica = d.estado.tipo === 'vazio' ? 'nada tocando no Spotify' : `${d.estado.musica.nome} — ${d.estado.musica.artistas}`
+  const review = d.review ? `última review: ${d.review.filme}` : 'filmes favoritos'
+  if (parte === 'musica') return `Música do Eduardo: ${musica}`
+  if (parte === 'filmes') return `Filmes do Eduardo: ${review}`
+  return `Música e filmes do Eduardo: ${musica}${d.review ? `; ${review}` : ''}`
+}
+
+export function renderizarPainel(d: DadosPainel, agora: Date, parte: PartePainel = 'completo'): string {
+  const comMusica = parte !== 'filmes'
+  const comFilmes = parte !== 'musica'
   const partes = juntar([
-    quadroMusica(d.estado, d.capa, agora),
-    quadroAlbuns(d, agora),
-    quadroReview(d.review, d.posterReview),
-    quadroTop4(d.top4, d.postersTop4),
+    ...(comMusica ? [{ css: '', defs: '', elementos: CABECALHO }, quadroMusica(d.estado, d.capa, agora), quadroAlbuns(d, agora)] : []),
+    ...(comFilmes ? [quadroReview(d.review, d.posterReview), quadroTop4(d.top4, d.postersTop4)] : []),
   ])
   // O 1º título do carrossel também aparece quando não há movimento.
   const elementos = partes.elementos.replace(`<g class="tit" style="--d:${ATRASOS[0]}">`, `<g class="tit primeiro" style="--d:${ATRASOS[0]}">`)
-  const texto = escaparXml(rotulo(d))
+  const texto = escaparXml(rotulo(d, parte))
+  const { y, altura } = RECORTES[parte]
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="840" height="356" viewBox="0 0 840 356" class="${d.estado.tipo}" role="img" aria-label="${texto}" font-family="${FONTE}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="840" height="${altura}" viewBox="0 ${y} 840 ${altura}" class="${d.estado.tipo}" role="img" aria-label="${texto}" font-family="${FONTE}">`,
     `<title>${texto}</title>`,
     `<style>${partes.css}${CSS_SEM_MOVIMENTO}</style>`,
     `<defs>${partes.defs}</defs>`,
-    `<rect x=".5" y=".5" width="839" height="355" rx="6" fill="${FUNDO}" stroke="${BORDA}"/>`,
-    CABECALHO,
+    // Só o fundo, sem borda: no README o painel fica dentro da moldura do próprio GitHub.
+    `<rect x="0" y="${y}" width="840" height="${altura}" rx="6" fill="${FUNDO}"/>`,
     elementos,
     '</svg>',
   ].join('')

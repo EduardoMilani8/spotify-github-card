@@ -157,4 +157,11 @@ describe('gerarPainel', () => {
     soltarPlaylist()
     await painel
   })
+
+  it('parte filmes não consulta o Spotify do tocando agora', async () => {
+    const { deps, chamadas } = criarDeps()
+    const svg = await gerarPainel(deps, criarMemo(), 'filmes')
+    expect(svg).toContain('>Aftersun<')
+    expect(chamadas('currently-playing')).toBe(0)
+  })
 })

@@ -82,11 +82,14 @@ Changes to the playlist show up within an hour. Tokens created before this featu
 3. Make it yours in code, then push:
    - **Top 4:** `src/painel/top4.ts` (title, year, director, poster URL). Letterboxd's RSS doesn't include favorites, so this list is fixed. For the poster, copy the image URL from the film's Letterboxd page and change the size to `0-70-0-105`.
    - **Header:** the `eduardo / gostos` text is `CABECALHO` in `src/painel/render-painel.ts`.
-4. Use one image in your profile README:
+4. Add it to your profile README. GitHub allows one link per image, so the panel comes in two halves that fit together: the music row opens the current track, and the movies row opens your Letterboxd profile.
 
 ```html
-<a href="https://<your-app>.vercel.app/api/open"><img src="https://<your-app>.vercel.app/api/painel" width="840" alt="Música e filmes"></a>
+<a href="https://<your-app>.vercel.app/api/open"><img src="https://<your-app>.vercel.app/api/painel?parte=musica" width="840" alt="Música"></a>
+<a href="https://letterboxd.com/<user>/"><img src="https://<your-app>.vercel.app/api/painel?parte=filmes" width="840" alt="Filmes"></a>
 ```
+
+   Prefer a single image with one link? Use `/api/painel` without `?parte`.
 
 Now playing is always fresh; albums, review and posters are kept in memory for up to an hour, so a new review or playlist change can take that long to show. Each frame fails on its own: if Letterboxd is down, the music frames still work, and vice versa.
 

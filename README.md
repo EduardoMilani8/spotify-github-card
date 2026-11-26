@@ -1,8 +1,16 @@
 # spotify-github-card
 
-An animated vinyl card for your GitHub profile that shows what you're playing on Spotify right now, or the last track you played.
+Animated SVG cards for your GitHub profile, served from Vercel:
 
-<img src="https://spotify-github-card.vercel.app/api/now-playing?mock=playing" width="440" alt="Card preview">
+<img src="https://spotify-github-card.vercel.app/api/painel?mock=playing" width="840" alt="Panel preview">
+
+| Endpoint | What it shows | Needs |
+|---|---|---|
+| `/api/now-playing` | A spinning vinyl with what you're playing on Spotify right now (or paused, or the last track) | Spotify |
+| `/api/showcase` | 3 albums you pick each month, in a carousel | Spotify + a playlist |
+| `/api/painel` | One panel that looks like a GitHub repo: now playing, the album showcase, your latest Letterboxd review and your top 4 films | Spotify + a playlist + Letterboxd |
+
+Start with the vinyl card (steps 1–5), then add the optional parts you want.
 
 ## Setup
 
@@ -67,24 +75,28 @@ Changes to the playlist show up within an hour. Tokens created before this featu
 
 ### Optional: one panel with music and movies
 
-`/api/painel` joins everything in a single 840×356 image that looks like a GitHub repository (Portuguese only): now playing, the album showcase, your latest Letterboxd review and a fixed top 4.
+`/api/painel` joins everything in a single 840×356 image that looks like a GitHub repository, with 4 frames: now playing, the album showcase, your latest Letterboxd review (film, stars, an excerpt and the poster) and a top 4 that highlights one film at a time. The panel text is in Portuguese.
 
-1. Add `LETTERBOXD_USER` (your Letterboxd username) to `.env` and to Vercel, then **Redeploy**. The review comes from `https://letterboxd.com/<user>/rss/`.
-2. Edit the top 4 in `src/painel/top4.ts` (title, year, director, poster URL).
-3. Use one image in your profile README:
+1. Set up the album showcase above (the panel reuses `SPOTIFY_SHOWCASE_PLAYLIST`).
+2. Add `LETTERBOXD_USER` (your Letterboxd username) to `.env` and to Vercel, then **Redeploy**. The review comes from your public feed at `https://letterboxd.com/<user>/rss/`: the latest entry with written text.
+3. Make it yours in code, then push:
+   - **Top 4:** `src/painel/top4.ts` (title, year, director, poster URL). Letterboxd's RSS doesn't include favorites, so this list is fixed. For the poster, copy the image URL from the film's Letterboxd page and change the size to `0-70-0-105`.
+   - **Header:** the `eduardo / gostos` text is `CABECALHO` in `src/painel/render-painel.ts`.
+4. Use one image in your profile README:
 
 ```html
 <a href="https://<your-app>.vercel.app/api/open"><img src="https://<your-app>.vercel.app/api/painel" width="840" alt="Música e filmes"></a>
 ```
 
-Now playing is always fresh; albums, review and posters are kept in memory for up to an hour.
+Now playing is always fresh; albums, review and posters are kept in memory for up to an hour, so a new review or playlist change can take that long to show. Each frame fails on its own: if Letterboxd is down, the music frames still work, and vice versa.
 
 ## Tips
 
 - **Size:** change `width` in the `<img>` tag.
-- **Language:** English by default. Add `?lang=pt` to the image URL for Portuguese.
+- **Language:** the vinyl and showcase cards are in English by default; add `?lang=pt` for Portuguese. The panel is Portuguese only.
 - **Preview without Spotify:** `/api/now-playing?mock=playing`, `paused`, `last`, `empty` or `long`; `/api/showcase?mock=showcase` or `empty`; `/api/painel?mock=playing`, `paused`, `last`, `empty` or `long`.
 - **Card says "Nothing playing right now"?** Your env vars are missing or wrong. Check them in Vercel, then **Redeploy**.
+- **Panel says "nenhuma review por aqui ainda"?** `LETTERBOXD_USER` is missing, or your feed has no review with text yet.
 - **Tests:** `npm test`
 
 ## License

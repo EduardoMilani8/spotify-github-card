@@ -65,11 +65,25 @@ A second card that shows 3 albums you pick, in an animated carousel.
 
 Changes to the playlist show up within an hour. Tokens created before this feature need `npm run token` again (it now asks for `playlist-read-private`).
 
+### Optional: one panel with music and movies
+
+`/api/painel` joins everything in a single 840×356 image that looks like a GitHub repository (Portuguese only): now playing, the album showcase, your latest Letterboxd review and a fixed top 4.
+
+1. Add `LETTERBOXD_USER` (your Letterboxd username) to `.env` and to Vercel, then **Redeploy**. The review comes from `https://letterboxd.com/<user>/rss/`.
+2. Edit the top 4 in `src/painel/top4.ts` (title, year, director, poster URL).
+3. Use one image in your profile README:
+
+```html
+<a href="https://<your-app>.vercel.app/api/open"><img src="https://<your-app>.vercel.app/api/painel" width="840" alt="Música e filmes"></a>
+```
+
+Now playing is always fresh; albums, review and posters are kept in memory for up to an hour.
+
 ## Tips
 
 - **Size:** change `width` in the `<img>` tag.
 - **Language:** English by default. Add `?lang=pt` to the image URL for Portuguese.
-- **Preview without Spotify:** `/api/now-playing?mock=playing`, `paused`, `last`, `empty` or `long`; `/api/showcase?mock=showcase` or `empty`.
+- **Preview without Spotify:** `/api/now-playing?mock=playing`, `paused`, `last`, `empty` or `long`; `/api/showcase?mock=showcase` or `empty`; `/api/painel?mock=playing`, `paused`, `last`, `empty` or `long`.
 - **Card says "Nothing playing right now"?** Your env vars are missing or wrong. Check them in Vercel, then **Redeploy**.
 - **Tests:** `npm test`
 

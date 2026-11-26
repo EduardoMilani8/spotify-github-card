@@ -25,10 +25,10 @@ const render = (d: Partial<DadosPainel> = {}) => renderizarPainel({ ...base, ...
 const ids = (svg: string) => [...svg.matchAll(/ id="([^"]+)"/g)].map((m) => m[1])
 
 describe('renderizarPainel', () => {
-  it('gera XML válido 840×356 com a classe do estado na raiz', () => {
+  it('gera XML válido, recortado nos quadros, com a classe do estado na raiz', () => {
     const svg = render()
     expect(XMLValidator.validate(svg)).toBe(true)
-    expect(svg).toMatch(/^<svg[^>]*viewBox="0 0 840 356"[^>]*class="tocando"/)
+    expect(svg).toMatch(/^<svg[^>]*viewBox="19 43.5 802 300"[^>]*class="tocando"/)
   })
 
   it('nenhum id repetido e toda referência aponta para um id existente', () => {
@@ -40,9 +40,13 @@ describe('renderizarPainel', () => {
     }
   })
 
-  it('cabeçalho de repositório e os 4 quadros', () => {
+  it('sem cabeçalho de repositório', () => {
+    for (const t of ['gostos', '>eduardo<', 'Public']) expect(render()).not.toContain(t)
+  })
+
+  it('os 4 quadros', () => {
     const svg = render()
-    for (const t of ['eduardo', 'gostos', 'Public', 'tocando-agora', 'albuns-do-mes', 'novembro', 'top-4-filmes', 'favoritos no Letterboxd'])
+    for (const t of ['tocando-agora', 'albuns-do-mes', 'novembro', 'top-4-filmes', 'favoritos no Letterboxd'])
       expect(svg).toContain(t)
   })
 
@@ -108,25 +112,25 @@ describe('renderizarPainel', () => {
 
   it('sem borda em volta do painel (só o fundo)', () => {
     expect(render()).not.toContain('stroke="#30363d"/><path d="M22 18')
-    expect(render()).toMatch(/<rect x="0" y="0" width="840" height="356" rx="6" fill="#0d1117"\/>/)
+    expect(render()).toMatch(/<rect x="19" y="43.5" width="802" height="300" rx="6" fill="#0d1117"\/>/)
   })
 })
 
 describe('renderizarPainel por parte', () => {
   const parte = (p: 'musica' | 'filmes') => renderizarPainel(base, AGORA, p)
 
-  it('musica: cabeçalho e linha de cima, recortada', () => {
+  it('musica: só a linha de cima, recortada', () => {
     const svg = parte('musica')
     expect(XMLValidator.validate(svg)).toBe(true)
-    expect(svg).toMatch(/^<svg[^>]*width="840" height="194" viewBox="0 0 840 194"/)
-    for (const t of ['gostos', 'tocando-agora', 'albuns-do-mes']) expect(svg).toContain(t)
+    expect(svg).toMatch(/^<svg[^>]*width="802" height="150" viewBox="19 43.5 802 150"/)
+    for (const t of ['tocando-agora', 'albuns-do-mes']) expect(svg).toContain(t)
     for (const t of ['Aftersun', 'top-4-filmes', 'Letterboxd']) expect(svg).not.toContain(t)
   })
 
   it('filmes: só a linha de baixo, sem imagens da música', () => {
     const svg = parte('filmes')
     expect(XMLValidator.validate(svg)).toBe(true)
-    expect(svg).toMatch(/^<svg[^>]*width="840" height="150" viewBox="0 194 840 150"/)
+    expect(svg).toMatch(/^<svg[^>]*width="802" height="150" viewBox="19 193.5 802 150"/)
     for (const t of ['>Aftersun<', 'top-4-filmes', 'favoritos no Letterboxd']) expect(svg).toContain(t)
     for (const t of ['gostos', 'tocando-agora', 'albuns-do-mes', 'a-img-0']) expect(svg).not.toContain(t)
   })

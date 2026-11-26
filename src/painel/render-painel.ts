@@ -221,14 +221,6 @@ function quadroTop4(filmes: Filme[], posters: (string | null)[]): Parte {
   }
 }
 
-const CABECALHO =
-  `<path d="M22 18 h9 a2 2 0 0 1 2 2 v10 h-9 a2 2 0 0 0 -2 2 Z" fill="none" stroke="${SECUNDARIO}" stroke-width="1.5"/>` +
-  `<text x="42" y="31" font-size="15" fill="${LINK}">eduardo</text>` +
-  `<text x="102" y="31" font-size="15" fill="${SECUNDARIO}">/</text>` +
-  `<text x="113" y="31" font-size="15" fill="${LINK}" font-weight="600">gostos</text>` +
-  `<rect x="172" y="18" width="48" height="18" rx="9" fill="none" stroke="${BORDA}"/>` +
-  `<text x="182" y="31" font-size="11" fill="${SECUNDARIO}">Public</text>`
-
 /** Sem animação: tudo congela onde está (os atrasos negativos já deixam cada item no lugar) e o 1º título aparece. */
 const CSS_SEM_MOVIMENTO =
   '@media (prefers-reduced-motion: reduce){*{animation-play-state:paused!important}.primeiro{opacity:1!important;transform:none!important}}'
@@ -236,11 +228,15 @@ const CSS_SEM_MOVIMENTO =
 /** Qual pedaço do painel desenhar: tudo, só a linha de cima (música) ou só a de baixo (filmes). */
 export type PartePainel = 'completo' | 'musica' | 'filmes'
 
-/** Recorte de cada parte (y inicial e altura). O GitHub só aceita um link por imagem, então o painel pode ser dividido em duas. */
-const RECORTES: Record<PartePainel, { y: number; altura: number }> = {
-  completo: { y: 0, altura: 356 },
-  musica: { y: 0, altura: 194 },
-  filmes: { y: 194, altura: 150 },
+/**
+ * Recorte de cada parte: a janela do viewBox em volta dos quadros (x 20.5–819.5; linhas em y 48.5 e 198.5),
+ * com margem mínima dos lados para os quadros ocuparem a imagem toda. O GitHub só aceita um link por
+ * imagem, então o painel pode ser dividido em duas metades que se encaixam.
+ */
+const RECORTES: Record<PartePainel, { x: number; y: number; largura: number; altura: number }> = {
+  completo: { x: 19, y: 43.5, largura: 802, altura: 300 },
+  musica: { x: 19, y: 43.5, largura: 802, altura: 150 },
+  filmes: { x: 19, y: 193.5, largura: 802, altura: 150 },
 }
 
 export function lerParte(valor: string | null | undefined): PartePainel {
@@ -259,20 +255,20 @@ export function renderizarPainel(d: DadosPainel, agora: Date, parte: PartePainel
   const comMusica = parte !== 'filmes'
   const comFilmes = parte !== 'musica'
   const partes = juntar([
-    ...(comMusica ? [{ css: '', defs: '', elementos: CABECALHO }, quadroMusica(d.estado, d.capa, agora), quadroAlbuns(d, agora)] : []),
+    ...(comMusica ? [quadroMusica(d.estado, d.capa, agora), quadroAlbuns(d, agora)] : []),
     ...(comFilmes ? [quadroReview(d.review, d.posterReview), quadroTop4(d.top4, d.postersTop4)] : []),
   ])
   // O 1º título do carrossel também aparece quando não há movimento.
   const elementos = partes.elementos.replace(`<g class="tit" style="--d:${ATRASOS[0]}">`, `<g class="tit primeiro" style="--d:${ATRASOS[0]}">`)
   const texto = escaparXml(rotulo(d, parte))
-  const { y, altura } = RECORTES[parte]
+  const { x, y, largura, altura } = RECORTES[parte]
   return [
-    `<svg xmlns="http://www.w3.org/2000/svg" width="840" height="${altura}" viewBox="0 ${y} 840 ${altura}" class="${d.estado.tipo}" role="img" aria-label="${texto}" font-family="${FONTE}">`,
+    `<svg xmlns="http://www.w3.org/2000/svg" width="${largura}" height="${altura}" viewBox="${x} ${y} ${largura} ${altura}" class="${d.estado.tipo}" role="img" aria-label="${texto}" font-family="${FONTE}">`,
     `<title>${texto}</title>`,
     `<style>${partes.css}${CSS_SEM_MOVIMENTO}</style>`,
     `<defs>${partes.defs}</defs>`,
     // Só o fundo, sem borda: no README o painel fica dentro da moldura do próprio GitHub.
-    `<rect x="0" y="${y}" width="840" height="${altura}" rx="6" fill="${FUNDO}"/>`,
+    `<rect x="${x}" y="${y}" width="${largura}" height="${altura}" rx="6" fill="${FUNDO}"/>`,
     elementos,
     '</svg>',
   ].join('')

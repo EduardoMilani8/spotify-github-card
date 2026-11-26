@@ -8,7 +8,7 @@ Animated SVG cards for your GitHub profile, served from Vercel:
 |---|---|---|
 | `/api/now-playing` | A spinning vinyl with what you're playing on Spotify right now (or paused, or the last track) | Spotify |
 | `/api/showcase` | 3 albums you pick each month, in a carousel | Spotify + a playlist |
-| `/api/painel` | One panel that looks like a GitHub repo: now playing, the album showcase, your latest Letterboxd review and your top 4 films | Spotify + a playlist + Letterboxd |
+| `/api/painel` | One panel in the GitHub style: now playing, the album showcase, your latest Letterboxd review and your top 4 films | Spotify + a playlist + Letterboxd |
 
 Start with the vinyl card (steps 1–5), then add the optional parts you want.
 
@@ -75,13 +75,12 @@ Changes to the playlist show up within an hour. Tokens created before this featu
 
 ### Optional: one panel with music and movies
 
-`/api/painel` joins everything in a single 840×356 image that looks like a GitHub repository, with 4 frames: now playing, the album showcase, your latest Letterboxd review (film, stars, an excerpt and the poster) and a top 4 that highlights one film at a time. The panel text is in Portuguese.
+`/api/painel` joins everything in one image with 4 frames in the GitHub style: now playing, the album showcase, your latest Letterboxd review (film, stars, an excerpt and the poster) and a top 4 that highlights one film at a time. The panel text is in Portuguese.
 
 1. Set up the album showcase above (the panel reuses `SPOTIFY_SHOWCASE_PLAYLIST`).
 2. Add `LETTERBOXD_USER` (your Letterboxd username) to `.env` and to Vercel, then **Redeploy**. The review comes from your public feed at `https://letterboxd.com/<user>/rss/`: the latest entry with written text.
 3. Make it yours in code, then push:
    - **Top 4:** `src/painel/top4.ts` (title, year, director, poster URL). Letterboxd's RSS doesn't include favorites, so this list is fixed. For the poster, copy the image URL from the film's Letterboxd page and change the size to `0-70-0-105`.
-   - **Header:** the `eduardo / gostos` text is `CABECALHO` in `src/painel/render-painel.ts`.
 4. Add it to your profile README. GitHub allows one link per image, so the panel comes in two halves that fit together: the music row opens the current track, and the movies row opens your Letterboxd profile.
 
 ```html

@@ -1,5 +1,6 @@
 import { obterEstado, type Dependencias } from '../gerar-card.js'
 import { baixarCapaBase64 } from '../spotify.js'
+import type { Estado } from '../tipos.js'
 import { obterAlbuns } from '../vitrine/gerar-vitrine.js'
 import type { Album } from '../vitrine/tipos.js'
 import { buscarRss, escolherReview } from './letterboxd.js'
@@ -48,7 +49,10 @@ async function lerReview(deps: Dependencias): Promise<{ review: Review | null; p
     return { review: null, poster: null, erro: true }
   }
   try {
-    const review = escolherReview(await buscarRss(usuario, deps.fetchFn))
+    const xml = await buscarRss(usuario, deps.fetchFn)
+    // Uma página de desafio ou de erro pode vir com status 200: sem <rss>, é falha, não "sem review".
+    if (!/<rss[\s>]/.test(xml)) throw new Error('Resposta do Letterboxd não é um RSS')
+    const review = escolherReview(xml)
     const poster = await baixar(review?.posterUrl ?? null, deps)
     return { review, poster, erro: review?.posterUrl ? poster === null : false }
   } catch (erro) {
@@ -57,15 +61,27 @@ async function lerReview(deps: Dependencias): Promise<{ review: Review | null; p
   }
 }
 
-async function buscarDadosLentos(deps: Dependencias): Promise<{ dados: DadosLentos; erro: boolean }> {
-  const [alb, rev, postersTop4] = await Promise.all([
+/**
+ * Busca as três partes; a que falhar mantém o valor bom anterior (se houver),
+ * e qualquer falha encurta o memo para 60s.
+ */
+async function buscarDadosLentos(deps: Dependencias, anterior: DadosLentos | null): Promise<{ dados: DadosLentos; erro: boolean }> {
+  const [alb, rev, postersNovos] = await Promise.all([
     lerAlbuns(deps),
     lerReview(deps),
     Promise.all(TOP4.map((f) => baixar(f.posterUrl, deps))),
   ])
+  const manterAlbuns = alb.erro && anterior !== null
+  const manterReview = rev.erro && anterior !== null
   return {
-    dados: { albuns: alb.albuns, capasAlbuns: alb.capas, review: rev.review, posterReview: rev.poster, postersTop4 },
-    erro: alb.erro || rev.erro || postersTop4.some((p) => p === null),
+    dados: {
+      albuns: manterAlbuns ? anterior.albuns : alb.albuns,
+      capasAlbuns: manterAlbuns ? anterior.capasAlbuns : alb.capas,
+      review: manterReview ? anterior.review : rev.review,
+      posterReview: manterReview ? anterior.posterReview : rev.poster,
+      postersTop4: postersNovos.map((p, i) => p ?? anterior?.postersTop4[i] ?? null),
+    },
+    erro: alb.erro || rev.erro || postersNovos.some((p) => p === null),
   }
 }
 
@@ -74,7 +90,7 @@ async function dadosLentos(deps: Dependencias, memo: Memo): Promise<DadosLentos>
   const agora = deps.agora().getTime()
   if (memo.valor && agora < memo.expiraEm) return memo.valor
   try {
-    const { dados, erro } = await buscarDadosLentos(deps)
+    const { dados, erro } = await buscarDadosLentos(deps, memo.valor)
     memo.valor = dados
     memo.expiraEm = agora + (erro ? UM_MINUTO : UMA_HORA)
     return dados
@@ -84,10 +100,15 @@ async function dadosLentos(deps: Dependencias, memo: Memo): Promise<DadosLentos>
   }
 }
 
+/** Estado do Spotify já com a capa: a capa baixa assim que o estado chega, sem esperar os dados lentos. */
+async function musicaComCapa(deps: Dependencias): Promise<{ estado: Estado; capa: string | null }> {
+  const estado = await obterEstado(deps)
+  return { estado, capa: estado.tipo === 'vazio' ? null : await baixar(estado.musica.capaUrl, deps) }
+}
+
 export async function gerarPainel(deps: Dependencias, memo: Memo = MEMO_DA_INSTANCIA): Promise<string> {
-  const [estado, lentos] = await Promise.all([obterEstado(deps), dadosLentos(deps, memo)])
+  const [{ estado, capa }, lentos] = await Promise.all([musicaComCapa(deps), dadosLentos(deps, memo)])
   try {
-    const capa = estado.tipo === 'vazio' ? null : await baixar(estado.musica.capaUrl, deps)
     return renderizarPainel({ estado, capa, ...lentos, top4: TOP4 }, deps.agora())
   } catch (erro) {
     deps.log('Falha ao montar o painel', erro)

@@ -118,4 +118,43 @@ describe('gerarPainel', () => {
     expect(chamadas('letterboxd.com')).toBe(2)
     expect(svg).toContain('>Aftersun<')
   })
+
+  it('memo: falha passageira de uma parte mantém o valor bom anterior dessa parte', async () => {
+    let falhar = false
+    const { deps, avancar } = criarDeps({ rss: () => (falhar ? new Response('x', { status: 503 }) : new Response(RSS)) })
+    const memo = criarMemo()
+    await gerarPainel(deps, memo)
+    falhar = true
+    avancar(61 * 60_000)
+    const svg = await gerarPainel(deps, memo)
+    expect(svg).toContain('>Aftersun<')
+    expect(svg).toContain('Album a')
+    expect(memo.expiraEm - deps.agora().getTime()).toBe(60_000)
+  })
+
+  it('resposta 200 que não é RSS (página de desafio) conta como erro: memo de 60s', async () => {
+    const { deps } = criarDeps({ rss: () => new Response('<!DOCTYPE html><html><body>Just a moment...</body></html>') })
+    const memo = criarMemo()
+    await gerarPainel(deps, memo)
+    expect(memo.expiraEm - deps.agora().getTime()).toBe(60_000)
+    expect(deps.log).toHaveBeenCalled()
+  })
+
+  it('a capa da música começa a baixar sem esperar os dados lentos', async () => {
+    const { deps } = criarDeps()
+    let soltarPlaylist: () => void = () => {}
+    const playlistPresa = new Promise<void>((r) => (soltarPlaylist = r))
+    const original = deps.fetchFn
+    const pedidos: string[] = []
+    deps.fetchFn = (async (url: string | URL | Request, init?: RequestInit) => {
+      const u = String(url)
+      pedidos.push(u)
+      if (u.includes('/playlists/')) await playlistPresa
+      return original(url, init)
+    }) as typeof fetch
+    const painel = gerarPainel(deps, criarMemo())
+    await vi.waitFor(() => expect(pedidos.some((u) => u.includes('i.scdn.co/capa'))).toBe(true))
+    soltarPlaylist()
+    await painel
+  })
 })

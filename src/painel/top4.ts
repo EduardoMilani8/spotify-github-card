@@ -24,7 +24,7 @@ export const TOP4: Filme[] = [
   {
     titulo: 'Uncut Gems',
     ano: 2019,
-    direcao: 'Josh Safdie, Benny Safdie',
+    direcao: 'Josh & Benny Safdie',
     posterUrl: `${POSTER}/4/0/4/2/6/6/404266-uncut-gems-0-70-0-105-crop.jpg?v=670cb7034d`,
   },
   {

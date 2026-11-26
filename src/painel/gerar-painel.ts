@@ -23,9 +23,11 @@ interface DadosLentos {
 export interface Memo {
   valor: DadosLentos | null
   expiraEm: number
+  /** Busca em andamento: visitas que chegam enquanto ela roda esperam a mesma, em vez de buscar de novo. */
+  emAndamento: Promise<DadosLentos> | null
 }
 
-export const criarMemo = (): Memo => ({ valor: null, expiraEm: 0 })
+export const criarMemo = (): Memo => ({ valor: null, expiraEm: 0, emAndamento: null })
 
 /** Memo da instância: sobrevive entre requisições enquanto a função estiver quente. */
 const MEMO_DA_INSTANCIA = criarMemo()
@@ -86,9 +88,16 @@ async function buscarDadosLentos(deps: Dependencias, anterior: DadosLentos | nul
 }
 
 /** Devolve os dados lentos do memo; busca de novo depois de 1h (ou 60s se a última busca teve erro). */
-async function dadosLentos(deps: Dependencias, memo: Memo): Promise<DadosLentos> {
+function dadosLentos(deps: Dependencias, memo: Memo): Promise<DadosLentos> {
   const agora = deps.agora().getTime()
-  if (memo.valor && agora < memo.expiraEm) return memo.valor
+  if (memo.valor && agora < memo.expiraEm) return Promise.resolve(memo.valor)
+  memo.emAndamento ??= atualizarMemo(deps, memo, agora).finally(() => {
+    memo.emAndamento = null
+  })
+  return memo.emAndamento
+}
+
+async function atualizarMemo(deps: Dependencias, memo: Memo, agora: number): Promise<DadosLentos> {
   try {
     const { dados, erro } = await buscarDadosLentos(deps, memo.valor)
     memo.valor = dados

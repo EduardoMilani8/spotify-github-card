@@ -164,4 +164,22 @@ describe('gerarPainel', () => {
     expect(svg).toContain('>Aftersun<')
     expect(chamadas('currently-playing')).toBe(0)
   })
+
+  it('visitas simultâneas com o memo vencido compartilham uma única busca', async () => {
+    const { deps, chamadas } = criarDeps()
+    const memo = criarMemo()
+    const svgs = await Promise.all([gerarPainel(deps, memo), gerarPainel(deps, memo), gerarPainel(deps, memo, 'filmes')])
+    expect(chamadas('letterboxd.com')).toBe(1)
+    expect(chamadas('/playlists/')).toBe(1)
+    for (const svg of svgs) expect(svg).toContain('>Aftersun<')
+  })
+
+  it('depois da busca compartilhada terminar, a próxima expiração busca de novo', async () => {
+    const { deps, chamadas, avancar } = criarDeps()
+    const memo = criarMemo()
+    await Promise.all([gerarPainel(deps, memo), gerarPainel(deps, memo)])
+    avancar(61 * 60_000)
+    await gerarPainel(deps, memo)
+    expect(chamadas('letterboxd.com')).toBe(2)
+  })
 })

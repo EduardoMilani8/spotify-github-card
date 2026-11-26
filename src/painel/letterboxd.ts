@@ -17,7 +17,27 @@ export async function buscarRss(usuario: string, fetchFn: FetchFn = fetch): Prom
   return resposta.text()
 }
 
-const ENTIDADES: Record<string, string> = { amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ' }
+/** Entidades nomeadas que aparecem em texto corrido: básicas, tipográficas e letras acentuadas. */
+const ENTIDADES: Record<string, string> = {
+  amp: '&', lt: '<', gt: '>', quot: '"', apos: "'", nbsp: ' ',
+  hellip: '…', ndash: '–', mdash: '—', lsquo: '‘', rsquo: '’', ldquo: '“', rdquo: '”', sbquo: '‚', bdquo: '„',
+  laquo: '«', raquo: '»', middot: '·', bull: '•', deg: '°', copy: '©', reg: '®', trade: '™', times: '×',
+  iexcl: '¡', iquest: '¿', ordf: 'ª', ordm: 'º', szlig: 'ß', aelig: 'æ', AElig: 'Æ', oslash: 'ø', Oslash: 'Ø',
+  ...entidadesAcentuadas(),
+}
+
+/** &eacute;, &atilde;, &ccedil;... gerados a partir da letra + acento combinante (só quando vira um caractere só). */
+function entidadesAcentuadas(): Record<string, string> {
+  const acentos: Record<string, string> = { acute: '\u0301', grave: '\u0300', circ: '\u0302', tilde: '\u0303', uml: '\u0308', cedil: '\u0327', ring: '\u030A' }
+  const tabela: Record<string, string> = {}
+  for (const letra of 'aeiouycnAEIOUYCN') {
+    for (const [nome, acento] of Object.entries(acentos)) {
+      const caractere = (letra + acento).normalize('NFC')
+      if (caractere.length === 1) tabela[letra + nome] = caractere
+    }
+  }
+  return tabela
+}
 
 function decodificarEntidades(texto: string): string {
   return texto.replace(/&(#x[0-9a-f]+|#\d+|[a-z]+);/gi, (inteira, nome: string) => {
@@ -25,7 +45,7 @@ function decodificarEntidades(texto: string): string {
       const codigo = nome[1].toLowerCase() === 'x' ? parseInt(nome.slice(2), 16) : parseInt(nome.slice(1), 10)
       return codigo > 0 && codigo <= 0x10ffff ? String.fromCodePoint(codigo) : ''
     }
-    return ENTIDADES[nome.toLowerCase()] ?? inteira
+    return ENTIDADES[nome] ?? ENTIDADES[nome.toLowerCase()] ?? inteira
   })
 }
 

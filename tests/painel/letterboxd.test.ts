@@ -29,6 +29,11 @@ describe('escolherReview', () => {
     )
   })
 
+  it('decodifica entidades tipográficas e acentos nomeados', () => {
+    const r = escolherReview(umItem('<p>Ele disse &ldquo;n&atilde;o&rdquo; &ndash; e eu&hellip; d&rsquo;aqui &eacute; &Ccedil;&mdash;fim &desconhecida;</p>'))
+    expect(r?.trecho).toBe('Ele disse “não” – e eu… d’aqui é Ç—fim &desconhecida;')
+  })
+
   it('aceita um item único (objeto em vez de lista)', () => {
     expect(escolherReview(umItem('<p>Muito bom.</p>'))?.trecho).toBe('Muito bom.')
   })
